@@ -17,7 +17,7 @@ export default function Dashboard() {
             {/* Dashboard Sections */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 {/* User Management Section */}
-                <Link href="/user-manage">
+                <Link href="/protected/user-manage">
                     <Card className="w-full">
                         <CardHeader>
                             <CardTitle>User Management</CardTitle>
@@ -29,7 +29,7 @@ export default function Dashboard() {
                 </Link>
 
                 {/* Station Management Section */}
-                <Link href="/station-manage">
+                <Link href="/protected/station-manage">
                     <Card className="w-full">
                         <CardHeader>
                             <CardTitle>Station Management</CardTitle>
@@ -41,7 +41,7 @@ export default function Dashboard() {
                 </Link>
 
                 {/* Train Management Section */}
-                <Link href="/train-manage">
+                <Link href="/protected/train-manage">
                     <Card className="w-full">
                         <CardHeader>
                             <CardTitle>Train Management</CardTitle>
@@ -53,7 +53,7 @@ export default function Dashboard() {
                 </Link>
 
                 {/* Route Management Section */}
-                <Link href="/route-manage">
+                <Link href="/protected/route-manage">
                     <Card className="w-full">
                         <CardHeader>
                             <CardTitle>Route Management</CardTitle>
