@@ -29,15 +29,17 @@ export default function Dashboard() {
                     </Card>
                 </Link>
                 {/* Station Management Section */}
-                <Card className="w-full">
-                    <CardHeader>
-                        <CardTitle>Station Management</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-gray-500">Manage stations, schedules, and monitor station health.</p>
-                    </CardContent>
-                </Card>
-
+                <Link
+                    href="user-manage">
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>Station Management</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-gray-500">Manage stations, schedules, and monitor station health.</p>
+                        </CardContent>
+                    </Card>
+                </Link>
                 {/* Train Management Section */}
                 <Card className="w-full">
                     <CardHeader>
