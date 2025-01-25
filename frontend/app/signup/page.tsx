@@ -5,6 +5,7 @@ import { signUp, type SignupActionResult } from "../actions/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -41,6 +42,7 @@ export default function SignUpPage() {
       phone: "",
     },
   })
+  const router = useRouter() // 2. Initialize the router
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
@@ -55,6 +57,8 @@ export default function SignUpPage() {
         setServerErrors({})
         setState({ success: true, message: result.message, errors: {} })
         form.reset()
+
+        router.push('/protected/dashboard')
       }
     })
   }
