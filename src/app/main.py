@@ -2,9 +2,9 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from passlib.context import CryptContext
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.db.connection import get_db_connection
 from app.db.init_db import create_tables
@@ -15,9 +15,15 @@ pwd_context = CryptContext(schemes=["bcrypt"])
 
 class SignupRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
-    email: Optional[EmailStr] = None
+    email: Optional[EmailStr] = ""
     password: str = Field(..., min_length=6)
     phone: str = Field(..., pattern="^[0-9]{11}$")
+
+    @field_validator("email", mode="before")
+    def normalize_email(cls, value):
+        if value == "":
+            return None
+        return value
 
 
 class SignupResponse(BaseModel):
