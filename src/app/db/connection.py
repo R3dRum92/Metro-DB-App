@@ -1,18 +1,35 @@
 import os
+from urllib.parse import urlparse
 
-import psycopg2
+import asyncpg
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql://ken_kaneki:autoshyektagoru@localhost:5432/metro_db"
+from app.utils.logger import logger
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
-def get_db_connection():
+async def get_db_connection() -> asyncpg.Connection:
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        print(f"Successfully connected to database")
-        return conn
+        if not DATABASE_URL:
+            logger.error("DATABASE_URL is not set in the environment variables")
+            raise ValueError("DATABASE_URL is not set in the environment variables")
+
+        result = urlparse(DATABASE_URL)
+        connection: asyncpg.Connection = await asyncpg.connect(
+            database=result.path[1:],
+            user=result.username,
+            password=result.password,
+            host=result.hostname,
+            port=result.port,
+        )
+        logger.info("Successfully connected to database")
+        return connection
     except Exception as e:
-        print(f"Error connecting to database: {e}")
-        return None
+        logger.error(f"Error connecting to database: {e}")
+        raise e
 
 
 if __name__ == "__main__":

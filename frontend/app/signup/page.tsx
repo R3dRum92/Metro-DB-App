@@ -15,7 +15,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z.union([
+    z.string().email("Invalid email"), // Valid email
+    z.string().length(0), // Allow empty string
+  ]),
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
 })
