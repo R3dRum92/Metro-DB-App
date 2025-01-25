@@ -4,16 +4,19 @@ import { z } from "zod"
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
+  email: z.union([
+    z.string().email("Invalid email"), // Valid email
+    z.string().length(0), // Allow empty string
+  ]),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
 })
 
 const signinSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-  })
-  
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+})
+
 
 export type SignupActionResult = {
   success?: boolean
@@ -51,66 +54,66 @@ export async function signUp(formData: FormData): Promise<SignupActionResult> {
 
     if (!response.ok) {
       const error = await response.json()
-      return { 
-        success: false, 
-        message: "Signup failed", 
-        errors: error.errors || { form: ["Server error occurred"] } 
+      return {
+        success: false,
+        message: "Signup failed",
+        errors: error.errors || { form: ["Server error occurred"] }
       }
     }
 
     const data = await response.json()
     return { success: true, message: data.message || "Signup successful!" }
-    
+
   } catch (error) {
-    return { 
-      success: false, 
-      message: "Failed to connect to server", 
-      errors: { form: ["Network error occurred"] } 
+    return {
+      success: false,
+      message: "Failed to connect to server",
+      errors: { form: ["Network error occurred"] }
     }
   }
 }
 
 export async function signIN(formData: FormData): Promise<SignupActionResult> {
-    const validatedFields = signinSchema.safeParse({
-      email: formData.get("email"),
-      password: formData.get("password"),
+  const validatedFields = signinSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  })
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors }
+  }
+
+  const { email, password } = validatedFields.data
+
+  try {
+    const response = await fetch('http://localhost:8000/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     })
-  
-    if (!validatedFields.success) {
-      return { errors: validatedFields.error.flatten().fieldErrors }
+
+    if (!response.ok) {
+      const error = await response.json()
+      return {
+        success: false,
+        message: "Signup failed",
+        errors: error.errors || { form: ["Server error occurred"] }
+      }
     }
-  
-    const { email, password} = validatedFields.data
-  
-    try {
-      const response = await fetch('http://localhost:8000/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-  
-      if (!response.ok) {
-        const error = await response.json()
-        return { 
-          success: false, 
-          message: "Signup failed", 
-          errors: error.errors || { form: ["Server error occurred"] } 
-        }
-      }
-  
-      const data = await response.json()
-      return { success: true, message: data.message || "SignIN successful!" }
-      
-    } catch (error) {
-      return { 
-        success: false, 
-        message: "Failed to connect to server", 
-        errors: { form: ["Network error occurred"] } 
-      }
+
+    const data = await response.json()
+    return { success: true, message: data.message || "SignIN successful!" }
+
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to connect to server",
+      errors: { form: ["Network error occurred"] }
     }
   }
+}
