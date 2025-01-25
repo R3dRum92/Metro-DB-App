@@ -1,9 +1,83 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useEffect, useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export default function Dashboard() {
+    const [routes, setRoutes] = useState<any[]>([])
+    const [trains, setTrains] = useState<any[]>([])
+    const [stations, setStations] = useState<any[]>([])
+    const [maintenance, setMaintenance] = useState<any[]>([])
+    const [notifications, setNotifications] = useState<any[]>([])
+    const [loading, setLoading] = useState<boolean>(true)
+
+    // Fetch data from the backend (using dummy data for now)
+    useEffect(() => {
+        async function fetchData() {
+            // Uncomment and use the backend fetch when the FastAPI server is ready
+            // try {
+            //     const responseRoutes = await fetch("http://localhost:8000/routes")
+            //     const dataRoutes = await responseRoutes.json()
+            //     setRoutes(dataRoutes)
+            //     const responseTrains = await fetch("http://localhost:8000/trains")
+            //     const dataTrains = await responseTrains.json()
+            //     setTrains(dataTrains)
+            //     const responseStations = await fetch("http://localhost:8000/stations")
+            //     const dataStations = await responseStations.json()
+            //     setStations(dataStations)
+            //     const responseMaintenance = await fetch("http://localhost:8000/maintenance")
+            //     const dataMaintenance = await responseMaintenance.json()
+            //     setMaintenance(dataMaintenance)
+            //     const responseNotifications = await fetch("http://localhost:8000/notifications")
+            //     const dataNotifications = await responseNotifications.json()
+            //     setNotifications(dataNotifications)
+            // } catch (error) {
+            //     console.error("Error fetching data:", error)
+            // } finally {
+            //     setLoading(false)
+            // }
+
+            // Dummy Data for Testing
+            const dummyRoutes = [
+                { route_name: "Route 1", stations: "Station 1, Station 2" },
+                { route_name: "Route 2", stations: "Station 3, Station 4" },
+                { route_name: "Route 3", stations: "Station 5, Station 6" },
+            ]
+            const dummyTrains = [
+                { train_name: "Train 1", status: "Running" },
+                { train_name: "Train 2", status: "Delayed" },
+                { train_name: "Train 3", status: "Running" },
+            ]
+            const dummyStations = [
+                { station_name: "Station 1", status: "Active" },
+                { station_name: "Station 2", status: "Under Maintenance" },
+                { station_name: "Station 3", status: "Active" },
+            ]
+            const dummyMaintenance = [
+                { task: "Track Repair", status: "Completed" },
+                { task: "Train Service Check", status: "In Progress" },
+                { task: "Station Cleaning", status: "Completed" },
+            ]
+            const dummyNotifications = [
+                { title: "Holiday Schedule", status: "Active" },
+                { title: "New Train Added", status: "Active" },
+                { title: "Maintenance Alert", status: "Expired" },
+            ]
+
+            setRoutes(dummyRoutes)
+            setTrains(dummyTrains)
+            setStations(dummyStations)
+            setMaintenance(dummyMaintenance)
+            setNotifications(dummyNotifications)
+            setLoading(false)
+        }
+
+        fetchData()
+    }, [])
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-6 space-y-8">
             {/* Dashboard Header */}
@@ -23,30 +97,37 @@ export default function Dashboard() {
                             <CardTitle className="text-xl font-bold text-black">Management Sections</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ul className="space-y-4">
-                                {[
-                                    { href: "/protected/user-manage", label: "User Management" },
-                                    { href: "/protected/station-manage", label: "Station Management" },
-                                    { href: "/protected/train-manage", label: "Train Management" },
-                                    { href: "/protected/route-manage", label: "Route Management" },
-                                    { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
-                                    { href: "/protected/reporting-analytics", label: "Reporting & Analytics" },
-                                    { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
-                                    { href: "/protected/support-feedback", label: "Support & Feedback" },
-                                ].map((item, index) => (
-                                    <li key={index}>
-                                        <Link
-                                            href={item.href}
-                                            className="block w-full bg-gray-200 text-black text-lg px-4 py-2 rounded-md hover:bg-gray-300 transition"
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
+                            <div className="overflow-x-auto">
+                                <table className="w-full table-auto">
+                                    <tbody>
+                                        {[
+                                            { href: "/protected/user-manage", label: "User Management" },
+                                            { href: "/protected/station-manage", label: "Station Management" },
+                                            { href: "/protected/train-manage", label: "Train Management" },
+                                            { href: "/protected/route-manage", label: "Route Management" },
+                                            { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
+                                            { href: "/protected/reporting-analytics", label: "Reporting & Analytics" },
+                                            { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
+                                            { href: "/protected/support-feedback", label: "Support & Feedback" },
+                                        ].map((item, index) => (
+                                            <tr key={index} className="border-t border-gray-300">
+                                                <td className="p-2">
+                                                    <Link
+                                                        href={item.href}
+                                                        className="block w-full text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors"
+                                                    >
+                                                        {item.label}
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
+
 
                 {/* Main Content - 2/3 of the page */}
                 <div className="w-2/3 space-y-6">
@@ -59,186 +140,125 @@ export default function Dashboard() {
                                 {/* Displaying first 5 rows of the Route table */}
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <h3 className="text-lg font-semibold text-center">Routes</h3>
-                                    <table className="w-full mt-2">
-                                        <thead>
-                                            <tr className="text-center text-gray-700">
-                                                <th>Route Name</th>
-                                                <th>Stations</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Fetch Route data from backend here later */}
-                                            <tr className="text-center">
-                                                <td>Route 1</td>
-                                                <td>Station 1, Station 2</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Route 2</td>
-                                                <td>Station 3, Station 4</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Route 3</td>
-                                                <td>Station 5, Station 6</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Route 4</td>
-                                                <td>Station 7, Station 8</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Route 5</td>
-                                                <td>Station 9, Station 10</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <Link href="/protected/route-manage" className="text-stone-600 hover:text-stone-800 mt-4 block text-center">Manage Routes</Link>
+                                    <Table>
+
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Route Name</TableHead>
+                                                <TableHead>Stations</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {routes.slice(0, 5).map((route, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{route.route_name}</TableCell>
+                                                    <TableCell>{route.stations}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-center mt-4">
+                                        <Link href="/protected/route-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors text-center">Manage Routes</Link>
+                                    </div>
                                 </div>
 
                                 {/* Displaying first 5 rows of the Train table */}
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <h3 className="text-lg font-semibold text-center">Trains</h3>
-                                    <table className="w-full mt-2">
-                                        <thead>
-                                            <tr className="text-center text-gray-700">
-                                                <th>Train Name</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Fetch Train data from backend here later */}
-                                            <tr className="text-center">
-                                                <td>Train 1</td>
-                                                <td>Running</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train 2</td>
-                                                <td>Delayed</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train 3</td>
-                                                <td>Running</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train 4</td>
-                                                <td>Delayed</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train 5</td>
-                                                <td>Running</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <Link href="/protected/train-manage" className="text-stone-600 hover:text-stone-800 mt-4 block text-center">Manage Trains</Link>
-                                </div>
+                                    <Table>
 
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Train Name</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {trains.slice(0, 5).map((train, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{train.train_name}</TableCell>
+                                                    <TableCell>{train.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-center mt-4">
+                                        <Link href="/protected/train-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Trains</Link>
+                                    </div>
+                                </div>
                                 {/* Displaying first 5 rows of the Station table */}
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <h3 className="text-lg font-semibold text-center">Stations</h3>
-                                    <table className="w-full mt-2">
-                                        <thead>
-                                            <tr className="text-center text-gray-700">
-                                                <th>Station Name</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Fetch Station data from backend here later */}
-                                            <tr className="text-center">
-                                                <td>Station 1</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Station 2</td>
-                                                <td>Under Maintenance</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Station 3</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Station 4</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Station 5</td>
-                                                <td>Under Maintenance</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <Link href="/protected/station-manage" className="text-stone-600 hover:text-stone-800 mt-4 block text-center">Manage Stations</Link>
+                                    <Table>
+
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Station Name</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {stations.slice(0, 5).map((station, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{station.station_name}</TableCell>
+                                                    <TableCell>{station.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-center mt-4">
+                                        <Link href="/protected/station-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Stations</Link>
+                                    </div>
                                 </div>
 
                                 {/* Displaying first 5 rows of Maintenance & Operations */}
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <h3 className="text-lg font-semibold text-center">Maintenance & Operations</h3>
-                                    <table className="w-full mt-2">
-                                        <thead>
-                                            <tr className="text-center text-gray-700">
-                                                <th>Task</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Fetch Maintenance & Operations data from backend here later */}
-                                            <tr className="text-center">
-                                                <td>Track Repair</td>
-                                                <td>Completed</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train Service Check</td>
-                                                <td>In Progress</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Station Cleaning</td>
-                                                <td>Completed</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Signal Maintenance</td>
-                                                <td>Scheduled</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Train Inspection</td>
-                                                <td>Scheduled</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <Link href="/protected/maintenance-operations" className="text-stone-600 hover:text-stone-800 mt-4 block text-center">Manage Maintenance</Link>
+                                    <Table>
+
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Task</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {maintenance.slice(0, 5).map((task, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{task.task}</TableCell>
+                                                    <TableCell>{task.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-center mt-4">
+                                        <Link href="/protected/maintenance-operations" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Maintenance</Link>
+                                    </div>
                                 </div>
 
                                 {/* Displaying Notifications */}
                                 <div className="p-4 bg-gray-100 rounded-lg">
                                     <h3 className="text-lg font-semibold text-center">Notifications</h3>
-                                    <table className="w-full mt-2">
-                                        <thead>
-                                            <tr className="text-center text-gray-700">
-                                                <th>Title</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* Fetch Notifications data from backend here later */}
-                                            <tr className="text-center">
-                                                <td>Holiday Schedule</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>New Train Added</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Maintenance Alert</td>
-                                                <td>Expired</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>Service Disruption</td>
-                                                <td>Active</td>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <td>System Update</td>
-                                                <td>Active</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <Link href="/protected/support-feedback" className="text-stone-600 hover:text-stone-800 mt-4 block text-center">Manage Notifications</Link>
+                                    <Table>
+
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead>Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {notifications.slice(0, 5).map((notification, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{notification.title}</TableCell>
+                                                    <TableCell>{notification.status}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    <div className="flex justify-center mt-4">
+                                        <Link href="/protected/support-feedback" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Notifications</Link>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
