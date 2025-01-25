@@ -4,7 +4,10 @@ import { z } from "zod"
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address").optional(),
+  email: z.union([
+    z.string().email("Invalid email"), // Valid email
+    z.string().length(0), // Allow empty string
+  ]),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
 })

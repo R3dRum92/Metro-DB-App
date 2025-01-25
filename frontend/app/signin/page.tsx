@@ -14,8 +14,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
 export default function SignUpPage() {
@@ -30,7 +30,7 @@ export default function SignUpPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      phone: "",
       password: "",
     },
   })
@@ -62,19 +62,19 @@ export default function SignUpPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Email Field */}
+              {/* phone Field */}
               <FormField
                 control={form.control}
-                name="email"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Phone number</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="john@example.com" {...field} />
+                      <Input type="tel" placeholder="01xxxxxxxxx" {...field} />
                     </FormControl>
                     <FormMessage />
-                    {serverErrors.email && (
-                      <p className="text-sm font-medium text-destructive">{serverErrors.email[0]}</p>
+                    {serverErrors.phone && (
+                      <p className="text-sm font-medium text-destructive">{serverErrors.phone[0]}</p>
                     )}
                   </FormItem>
                 )}
@@ -87,7 +87,7 @@ export default function SignUpPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="********" {...field} />
+                      <Input type="password" placeholder="******" {...field} />
                     </FormControl>
                     <FormMessage />
                     {serverErrors.password && (
@@ -96,7 +96,7 @@ export default function SignUpPage() {
                   </FormItem>
                 )}
               />
-              
+
               {/* Submit Button */}
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? (
