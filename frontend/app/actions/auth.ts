@@ -8,13 +8,13 @@ const signupSchema = z.object({
     z.string().email("Invalid email"), // Valid email
     z.string().length(0), // Allow empty string
   ]),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
 })
 
 const signinSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
 
