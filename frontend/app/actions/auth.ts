@@ -28,7 +28,14 @@ const signinSchema = z.object({
 export type SignupActionResult = {
   success?: boolean
   message?: string
+  errors?: Record<string, string[]>
+}
+
+export type SignInActionResult = {
+  success?: boolean
+  message?: string
   role?: string
+  access_token?: string
   errors?: Record<string, string[]>
 }
 
@@ -82,7 +89,7 @@ export async function signUp(formData: FormData): Promise<SignupActionResult> {
   }
 }
 
-export async function signIN(formData: FormData): Promise<SignupActionResult> {
+export async function signIN(formData: FormData): Promise<SignInActionResult> {
   const validatedFields = signinSchema.safeParse({
     phone: formData.get("phone"),
     password: formData.get("password"),
@@ -118,20 +125,30 @@ export async function signIN(formData: FormData): Promise<SignupActionResult> {
 
     const data = await response.json()
 
-    const decodedToken = jwtDecode<CustomJwtPayload>(data.access_token)
-    const userRole = decodedToken?.role
+    try {
+      const decodedToken = jwtDecode<CustomJwtPayload>(data.access_token)
+      const userRole = decodedToken?.role || "user"
 
-    localStorage.setItem("access_token", data.access_token)
-    localStorage.setItem("user_role", userRole)
-
-    return { success: true, role: userRole, message: data.message || "Login successful!" }
-
+      return {
+        success: true,
+        role: userRole,
+        access_token: data.access_token,
+        message: data.message || "Login Successful",
+      }
+    } catch (decodeError) {
+      console.error("JWT Decode Error:", decodeError)
+      return {
+        success: false,
+        message: "Failed to decode token",
+        errors: { form: ["Invalid token received from server"] },
+      }
+    }
   } catch (error) {
     console.log(error)
     return {
       success: false,
       message: "Failed to connect to server",
-      errors: { form: ["Network error occurred"] }
+      errors: { form: ["Network error occurred"] },
     }
   }
 }
