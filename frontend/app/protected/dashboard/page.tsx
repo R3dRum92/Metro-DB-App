@@ -81,10 +81,10 @@ export default function Dashboard() {
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-6 space-y-8">
             {/* Dashboard Header */}
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold text-center text-black">Admin Dashboard</CardTitle>
-                    <CardDescription className="text-center text-lg text-gray-700">Welcome to the Metro Admin Dashboard</CardDescription>
+            <Card className="w-full max-w-4xl border-primary/20">
+                <CardHeader className="bg-primary/10">
+                    <CardTitle className="text-3xl font-bold text-center text-primary">Admin Dashboard</CardTitle>
+                    <CardDescription className="text-center text-lg text-muted-foreground">Welcome to the Metro Admin Dashboard</CardDescription>
                 </CardHeader>
             </Card>
 
@@ -92,9 +92,9 @@ export default function Dashboard() {
             <div className="container mx-auto flex min-h-screen p-4 space-x-6">
                 {/* Sidebar - 1/3 of the page */}
                 <div className="w-1/3">
-                    <Card className="shadow-md">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold text-black">Management Sections</CardTitle>
+                    <Card className="shadow-md border-primary/20">
+                        <CardHeader className="bg-primary/10">
+                            <CardTitle className="text-xl font-bold text-primary">Management Sections</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="overflow-x-auto">
@@ -110,11 +110,11 @@ export default function Dashboard() {
                                             { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
                                             { href: "/protected/support-feedback", label: "Support & Feedback" },
                                         ].map((item, index) => (
-                                            <tr key={index} className="border-t border-gray-300">
+                                            <tr key={index} className="border-t border-primary/10">
                                                 <td className="p-2">
                                                     <Link
                                                         href={item.href}
-                                                        className="block w-full text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors"
+                                                        className="block w-full text-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors"
                                                     >
                                                         {item.label}
                                                     </Link>
@@ -131,19 +131,18 @@ export default function Dashboard() {
 
                 {/* Main Content - 2/3 of the page */}
                 <div className="w-2/3 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold text-center text-black">Recent Data</CardTitle>
+                    <Card className="border-primary/20">
+                        <CardHeader className="bg-primary/10">
+                            <CardTitle className="text-xl font-bold text-center text-primary">Recent Data</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                 {/* Displaying first 5 rows of the Route table */}
-                                <div className="p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-center">Routes</h3>
+                                <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Routes</h3>
                                     <Table>
-
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-primary/5">
                                                 <TableHead>Route Name</TableHead>
                                                 <TableHead>Stations</TableHead>
                                             </TableRow>
@@ -158,17 +157,16 @@ export default function Dashboard() {
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/route-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors text-center">Manage Routes</Link>
+                                        <Link href="/protected/route-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors text-center">Manage Routes</Link>
                                     </div>
                                 </div>
 
                                 {/* Displaying first 5 rows of the Train table */}
-                                <div className="p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-center">Trains</h3>
+                                <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Trains</h3>
                                     <Table>
-
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-primary/5">
                                                 <TableHead>Train Name</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </TableRow>
@@ -183,16 +181,15 @@ export default function Dashboard() {
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/train-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Trains</Link>
+                                        <Link href="/protected/train-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Trains</Link>
                                     </div>
                                 </div>
                                 {/* Displaying first 5 rows of the Station table */}
-                                <div className="p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-center">Stations</h3>
+                                <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Stations</h3>
                                     <Table>
-
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-primary/5">
                                                 <TableHead>Station Name</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </TableRow>
@@ -207,17 +204,16 @@ export default function Dashboard() {
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/station-manage" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Stations</Link>
+                                        <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
                                     </div>
                                 </div>
 
                                 {/* Displaying first 5 rows of Maintenance & Operations */}
-                                <div className="p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-center">Maintenance & Operations</h3>
+                                <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Maintenance & Operations</h3>
                                     <Table>
-
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-primary/5">
                                                 <TableHead>Task</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </TableRow>
@@ -232,17 +228,16 @@ export default function Dashboard() {
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/maintenance-operations" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Maintenance</Link>
+                                        <Link href="/protected/maintenance-operations" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Maintenance</Link>
                                     </div>
                                 </div>
 
                                 {/* Displaying Notifications */}
-                                <div className="p-4 bg-gray-100 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-center">Notifications</h3>
+                                <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Notifications</h3>
                                     <Table>
-
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-primary/5">
                                                 <TableHead>Title</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </TableRow>
@@ -257,7 +252,7 @@ export default function Dashboard() {
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/support-feedback" className="text-stone-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors">Manage Notifications</Link>
+                                        <Link href="/protected/support-feedback" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Notifications</Link>
                                     </div>
                                 </div>
                             </div>

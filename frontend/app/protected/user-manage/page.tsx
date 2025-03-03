@@ -6,13 +6,16 @@ import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCap
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+// Modal Components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+
 interface User {
     id: number
     name: string
     email: string
     phone: string
     wallet: number
-    history: string
+    // Removed 'history' as it's now handled via modal
 }
 
 interface HistoryEntry {
@@ -36,10 +39,12 @@ export default function UserManagement() {
     // Fetch the list of users from the FastAPI backend
     useEffect(() => {
         async function fetchUsers() {
-            // Uncomment and use this once the backend is ready
             try {
                 const response = await fetch("http://localhost:8000/users")
-                const data = await response.json()
+                if (!response.ok) {
+                    throw new Error(`Error fetching users: ${response.statusText}`)
+                }
+                const data: User[] = await response.json()
                 setUsers(data)
             } catch (error) {
                 console.error("Error fetching users:", error)
@@ -55,7 +60,6 @@ export default function UserManagement() {
             //         email: "john.doe@example.com",
             //         phone: "01771234567",
             //         wallet: 150.0,
-            //         history: "/protected/user-history/1" // Link to history page
             //     },
             //     {
             //         id: 2,
@@ -63,7 +67,6 @@ export default function UserManagement() {
             //         email: "jane.smith@example.com",
             //         phone: "01819876543",
             //         wallet: 200.0,
-            //         history: "/protected/user-history/2" // Link to history page
             //     }
             // ]
             // setUsers(dummyUsers)
@@ -72,6 +75,7 @@ export default function UserManagement() {
 
         fetchUsers()
     }, [])
+
     // Function to handle "View History" button click
     const handleViewHistory = (user: User) => {
         setSelectedUser(user)
@@ -142,11 +146,11 @@ export default function UserManagement() {
                                         <TableCell>{user.name}</TableCell>
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>{user.phone}</TableCell>
-                                        <TableCell>{user.wallet}</TableCell>
+                                        <TableCell>${user.wallet.toFixed(2)}</TableCell>
                                         <TableCell className="text-center">
-                                            <Link href={`/protected/user-history/${user.id}`} className="text-blue-500 hover:underline">
+                                            <Button variant="link" onClick={() => handleViewHistory(user)} className="text-blue-500 hover:underline">
                                                 View History
-                                            </Link>
+                                            </Button>
                                         </TableCell>
                                         <TableCell className="text-center flex justify-center gap-2">
                                             <Button onClick={() => alert(`Edit user: ${user.name}`)} className="mr-2">
@@ -163,6 +167,54 @@ export default function UserManagement() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Modal for User History */}
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {selectedUser ? `${selectedUser.name}'s History` : "User History"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            View recent actions and activities of the selected user.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4">
+                        {historyLoading ? (
+                            <p>Loading history...</p>
+                        ) : historyError ? (
+                            <p className="text-red-500">{historyError}</p>
+                        ) : historyData.length === 0 ? (
+                            <p>No history available for this user.</p>
+                        ) : (
+                            <Table>
+                                <TableCaption>Recent history entries for {selectedUser?.name}</TableCaption>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Action</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Details</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {historyData.map((entry) => (
+                                        <TableRow key={entry.id}>
+                                            <TableCell>{entry.action}</TableCell>
+                                            <TableCell>{new Date(entry.date).toLocaleString()}</TableCell>
+                                            <TableCell>{entry.details}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )}
+                    </div>
+                    <div className="mt-6 flex justify-end">
+                        <Button onClick={closeModal} variant="secondary">
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
