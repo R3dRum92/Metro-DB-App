@@ -132,7 +132,6 @@ docker-compose.override.yml
 *.pid
 
 # Exclude database files and backups
-*.sql
 *.sqlite3
 db_data/
 

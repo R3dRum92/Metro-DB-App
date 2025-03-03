@@ -59,7 +59,7 @@ export default function StationManage() {
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
             <Card className="w-full max-w-4xl">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-center">Station Management</CardTitle>
+                    <CardTitle className="text-primary text-2xl font-bold text-center">Station Management</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-center text-sm text-gray-500">
@@ -100,7 +100,7 @@ export default function StationManage() {
                         )}
                         {/* Add Station button */}
                         <div className="mt-6 text-center">
-                            <Button className="px-4 py-2 bg-black text-white rounded">Add Station</Button>
+                            <Button className="px-4 py-2 bg-primary text-white rounded">Add Station</Button>
                         </div>
                     </div>
                 </CardContent>

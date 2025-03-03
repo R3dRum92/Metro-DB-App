@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+app = FastAPI()
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -68,6 +70,15 @@ class SignupResponse(BaseModel):
     message: str
 
 
+class UserResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    email: Optional[EmailStr] = None
+    phone: str
+    wallet: float
+    history: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up... Connecting to the database.")
@@ -85,6 +96,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 # @app.on_event("startup")
 # async def startup():
@@ -93,9 +113,46 @@ app = FastAPI(lifespan=lifespan)
 #     run_migrations()
 
 
+
 @app.get("/")
 async def root():
     return {"message": "Metro System API is up and running!"}
+
+
+
+@app.get("/users")
+async def get_users():
+    try:
+        conn = await get_db_connection()
+
+        try:
+            rows = await conn.fetch("SELECT * FROM users")
+            # return rows
+            # logger.info(result)
+            users = [
+                UserResponse(
+                    id=row["id"],
+                    name=row["name"],
+                    email=row["email"],
+                    phone=row["phone_number"],
+                    wallet=150.0,
+                    history="/protected/user-history/" + str(row["id"]),
+                )
+                for row in rows
+            ]
+
+            return users
+        except Exception as e:
+            logger.error(f"Error fetching users from database: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error fetching users from database. Please try again later.",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        pass
+
 
 
 @app.get("/test-db")
@@ -212,3 +269,4 @@ async def signin(form_data: SigninRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process sign in. Please try again later.",
         )
+
