@@ -63,7 +63,7 @@ export default function SignUpPage() {
     <div className="container mx-auto flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
+          <CardTitle className="text-primary text-2xl font-bold text-center">Create your account</CardTitle>
           <CardDescription className="text-center">Enter your information to sign up</CardDescription>
         </CardHeader>
         <CardContent>
