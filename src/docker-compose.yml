@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.8'
 
 services:
   src:
@@ -8,3 +8,20 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 8080:8080
+
+  postgres:
+    image: postgres
+    container_name: metro_db
+    restart: always
+    environment:
+      POSTGRES_USER: ken_kaneki
+      POSTGRES_PASSWORD: autoshyektagoru
+      POSTGRES_DB: metro_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    user: "postgres"
+
+volumes:
+  postgres_data:

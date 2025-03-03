@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { signUp, type SignupActionResult } from "../actions/auth"
+import { signIN, type SignupActionResult } from "../actions/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -35,12 +37,14 @@ export default function SignUpPage() {
     },
   })
 
+  const router = useRouter() // 2. Initialize the router
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       const formData = new FormData()
       Object.entries(values).forEach(([key, value]) => formData.append(key, value))
 
-      const result = await signUp(formData)
+      const result = await signIN(formData)
       if (result?.errors) {
         setServerErrors(result.errors)
         setState({ success: false, message: "", errors: result.errors })
@@ -48,6 +52,9 @@ export default function SignUpPage() {
         setServerErrors({})
         setState({ success: true, message: result.message, errors: {} })
         form.reset()
+
+        router.push('/protected/dashboard')
+
       }
     })
   }
@@ -107,12 +114,18 @@ export default function SignUpPage() {
                 ) : (
                   <>
                     <Icons.lock className="mr-2 h-4 w-4" />
-                    Sign up
+                    Sign In
                   </>
                 )}
               </Button>
             </form>
           </Form>
+          {serverErrors.form && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{serverErrors.form[0]}</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
         <CardFooter>
           {state?.success && (

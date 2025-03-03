@@ -24,7 +24,3 @@ async def create_tables(connection: Connection):
         except Exception as e:
             logger.error(f"Error executing {sql_file}: {e}")
             raise e
-
-        
-
-    

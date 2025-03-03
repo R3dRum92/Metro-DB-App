@@ -1,36 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { signUp, type SignupActionResult } from "../actions/auth"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { useState, useTransition } from "react";
+import { signUp, type SignupActionResult } from "../actions/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Icons } from "@/components/ui/icons"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Icons } from "@/components/ui/icons";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.union([
-    z.string().email("Invalid email"), // Valid email
-    z.string().length(0), // Allow empty string
+    z.string().email("Invalid email"),
+    z.string().length(0),
   ]),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
-})
+});
 
 export default function SignUpPage() {
-  const [isPending, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<SignupActionResult>({
     success: false,
     message: "",
     errors: {},
-  })
-  const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({})
+  });
+  const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,23 +41,25 @@ export default function SignUpPage() {
       password: "",
       phone: "",
     },
-  })
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
-      const formData = new FormData()
-      Object.entries(values).forEach(([key, value]) => formData.append(key, value))
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => formData.append(key, value));
 
-      const result = await signUp(formData)
-      if (result?.errors) {
-        setServerErrors(result.errors)
-        setState({ success: false, message: "", errors: result.errors })
+      const result = await signUp(formData);
+
+      if (result.errors) {
+        setServerErrors(result.errors);
+        setState({ success: false, message: "", errors: result.errors });
       } else {
-        setServerErrors({})
-        setState({ success: true, message: result.message, errors: {} })
-        form.reset()
+        setServerErrors({});
+        setState({ success: true, message: result.message, errors: {} });
+        form.reset();
+        router.push("/protected/dashboard");
       }
-    })
+    });
   }
 
   return (
@@ -165,5 +168,5 @@ export default function SignUpPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
-<<<<<<< Updated upstream
 app = FastAPI()
-=======
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -104,19 +105,19 @@ app.add_middleware(
 )
 
 
+
 # @app.on_event("startup")
 # async def startup():
 #     from app.db.init_db import run_migrations
 
 #     run_migrations()
->>>>>>> Stashed changes
+
 
 
 @app.get("/")
 async def root():
     return {"message": "Metro System API is up and running!"}
-<<<<<<< Updated upstream
-=======
+
 
 
 @app.get("/users")
@@ -151,6 +152,7 @@ async def get_users():
             await conn.close()
     except Exception as e:
         pass
+
 
 
 @app.get("/test-db")
@@ -267,4 +269,4 @@ async def signin(form_data: SigninRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process sign in. Please try again later.",
         )
->>>>>>> Stashed changes
+

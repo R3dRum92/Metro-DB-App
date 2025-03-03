@@ -1,6 +1,13 @@
 "use server"
 
 import { z } from "zod"
+import { jwtDecode } from "jwt-decode"
+import { JwtPayload } from "jwt-decode"
+
+interface CustomJwtPayload extends JwtPayload {
+  role: string
+  user_id?: string
+}
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -13,7 +20,7 @@ const signupSchema = z.object({
 })
 
 const signinSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
@@ -21,6 +28,14 @@ const signinSchema = z.object({
 export type SignupActionResult = {
   success?: boolean
   message?: string
+  errors?: Record<string, string[]>
+}
+
+export type SignInActionResult = {
+  success?: boolean
+  message?: string
+  role?: string
+  access_token?: string
   errors?: Record<string, string[]>
 }
 
@@ -54,10 +69,11 @@ export async function signUp(formData: FormData): Promise<SignupActionResult> {
 
     if (!response.ok) {
       const error = await response.json()
+      console.log(error)
       return {
         success: false,
         message: "Signup failed",
-        errors: error.errors || { form: ["Server error occurred"] }
+        errors: error.detail.errors || { form: ["Server error occurred"] }
       }
     }
 
@@ -73,9 +89,9 @@ export async function signUp(formData: FormData): Promise<SignupActionResult> {
   }
 }
 
-export async function signIN(formData: FormData): Promise<SignupActionResult> {
+export async function signIN(formData: FormData): Promise<SignInActionResult> {
   const validatedFields = signinSchema.safeParse({
-    email: formData.get("email"),
+    phone: formData.get("phone"),
     password: formData.get("password"),
   })
 
@@ -83,7 +99,7 @@ export async function signIN(formData: FormData): Promise<SignupActionResult> {
     return { errors: validatedFields.error.flatten().fieldErrors }
   }
 
-  const { email, password } = validatedFields.data
+  const { phone, password } = validatedFields.data
 
   try {
     const response = await fetch('http://localhost:8000/signin', {
@@ -92,28 +108,47 @@ export async function signIN(formData: FormData): Promise<SignupActionResult> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email,
+        phone,
         password,
       }),
     })
 
     if (!response.ok) {
       const error = await response.json()
+      console.log(error.detail)
       return {
         success: false,
-        message: "Signup failed",
-        errors: error.errors || { form: ["Server error occurred"] }
+        message: "SignIn failed",
+        errors: error.detail.errors || { form: ["Server error occurred"] }
       }
     }
 
     const data = await response.json()
-    return { success: true, message: data.message || "SignIN successful!" }
 
+    try {
+      const decodedToken = jwtDecode<CustomJwtPayload>(data.access_token)
+      const userRole = decodedToken?.role || "user"
+
+      return {
+        success: true,
+        role: userRole,
+        access_token: data.access_token,
+        message: data.message || "Login Successful",
+      }
+    } catch (decodeError) {
+      console.error("JWT Decode Error:", decodeError)
+      return {
+        success: false,
+        message: "Failed to decode token",
+        errors: { form: ["Invalid token received from server"] },
+      }
+    }
   } catch (error) {
+    console.log(error)
     return {
       success: false,
       message: "Failed to connect to server",
-      errors: { form: ["Network error occurred"] }
+      errors: { form: ["Network error occurred"] },
     }
   }
 }
