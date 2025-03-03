@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -17,29 +17,6 @@ export default function Dashboard() {
     // Fetch data from the backend (using dummy data for now)
     useEffect(() => {
         async function fetchData() {
-            // Uncomment and use the backend fetch when the FastAPI server is ready
-            // try {
-            //     const responseRoutes = await fetch("http://localhost:8000/routes")
-            //     const dataRoutes = await responseRoutes.json()
-            //     setRoutes(dataRoutes)
-            //     const responseTrains = await fetch("http://localhost:8000/trains")
-            //     const dataTrains = await responseTrains.json()
-            //     setTrains(dataTrains)
-            //     const responseStations = await fetch("http://localhost:8000/stations")
-            //     const dataStations = await responseStations.json()
-            //     setStations(dataStations)
-            //     const responseMaintenance = await fetch("http://localhost:8000/maintenance")
-            //     const dataMaintenance = await responseMaintenance.json()
-            //     setMaintenance(dataMaintenance)
-            //     const responseNotifications = await fetch("http://localhost:8000/notifications")
-            //     const dataNotifications = await responseNotifications.json()
-            //     setNotifications(dataNotifications)
-            // } catch (error) {
-            //     console.error("Error fetching data:", error)
-            // } finally {
-            //     setLoading(false)
-            // }
-
             // Dummy Data for Testing
             const dummyRoutes = [
                 { route_name: "Route 1", stations: "Station 1, Station 2" },
@@ -79,64 +56,60 @@ export default function Dashboard() {
     }, [])
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-6 space-y-8">
-            {/* Dashboard Header */}
-            <Card className="w-full max-w-4xl border-primary/20">
+        <div className="flex flex-col h-screen">
+            {/* Full-width header */}
+            <Card className="w-full border-primary/20 mb-6">
                 <CardHeader className="bg-primary/10">
                     <CardTitle className="text-3xl font-bold text-center text-primary">Admin Dashboard</CardTitle>
                     <CardDescription className="text-center text-lg text-muted-foreground">Welcome to the Metro Admin Dashboard</CardDescription>
                 </CardHeader>
             </Card>
 
-            {/* Sidebar and Main Content Section */}
-            <div className="container mx-auto flex min-h-screen p-4 space-x-6">
-                {/* Sidebar - 1/3 of the page */}
-                <div className="w-1/3">
-                    <Card className="shadow-md border-primary/20">
+            {/* Main content area with sidebar and data display */}
+            <div className="flex flex-grow overflow-hidden">
+                {/* Sidebar - 1/4 of the page */}
+                <div className="w-1/4 bg-card border-r border-primary/20 overflow-y-auto">
+                    <div>
                         <CardHeader className="bg-primary/10">
-                            <CardTitle className="text-xl font-bold text-primary">Management Sections</CardTitle>
+                            <CardTitle className="text-xl font-bold text-center text-primary">Management Sections</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="overflow-x-auto">
-                                <table className="w-full table-auto">
-                                    <tbody>
-                                        {[
-                                            { href: "/protected/user-manage", label: "User Management" },
-                                            { href: "/protected/station-manage", label: "Station Management" },
-                                            { href: "/protected/train-manage", label: "Train Management" },
-                                            { href: "/protected/route-manage", label: "Route Management" },
-                                            { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
-                                            { href: "/protected/reporting-analytics", label: "Reporting & Analytics" },
-                                            { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
-                                            { href: "/protected/support-feedback", label: "Support & Feedback" },
-                                        ].map((item, index) => (
-                                            <tr key={index} className="border-t border-primary/10">
-                                                <td className="p-2">
-                                                    <Link
-                                                        href={item.href}
-                                                        className="block w-full text-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors"
-                                                    >
-                                                        {item.label}
-                                                    </Link>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        <div className="p-4">
+                            <nav>
+                                <ul className="space-y-2">
+                                    {[
+                                        { href: "/protected/user-manage", label: "User Management" },
+                                        { href: "/protected/station-manage", label: "Station Management" },
+                                        { href: "/protected/train-manage", label: "Train Management" },
+                                        { href: "/protected/route-manage", label: "Route Management" },
+                                        { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
+                                        { href: "/protected/reporting-analytics", label: "Reporting & Analytics" },
+                                        { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
+                                        { href: "/protected/support-feedback", label: "Support & Feedback" },
+                                    ].map((item, index) => (
+                                        <li key={index} className="border-b border-primary/10">
+                                            <Link
+                                                href={item.href}
+                                                className="block w-full text-foreground px-4 py-3 rounded-md hover:bg-primary/10 transition-colors"
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
 
-
-                {/* Main Content - 2/3 of the page */}
-                <div className="w-2/3 space-y-6">
-                    <Card className="border-primary/20">
+                {/* Main Content - 3/4 of the page */}
+                <div className="w-3/4 overflow-y-auto pb-8">
+                    {/* Content Grid with proper spacing to avoid cut-off */}
+                    <Card className="border-primary/20 min-h-full rounded-none">
                         <CardHeader className="bg-primary/10">
                             <CardTitle className="text-xl font-bold text-center text-primary">Recent Data</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        <CardContent className="p-6">
+                            <div className="grid grid-cols-2 gap-6 mb-6">
                                 {/* Displaying first 5 rows of the Route table */}
                                 <div className="p-4 bg-card rounded-lg border border-primary/20">
                                     <h3 className="text-lg font-semibold text-center text-primary mb-2">Routes</h3>
@@ -184,6 +157,7 @@ export default function Dashboard() {
                                         <Link href="/protected/train-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Trains</Link>
                                     </div>
                                 </div>
+
                                 {/* Displaying first 5 rows of the Station table */}
                                 <div className="p-4 bg-card rounded-lg border border-primary/20">
                                     <h3 className="text-lg font-semibold text-center text-primary mb-2">Stations</h3>
@@ -231,29 +205,29 @@ export default function Dashboard() {
                                         <Link href="/protected/maintenance-operations" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Maintenance</Link>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Displaying Notifications */}
-                                <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Notifications</h3>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-primary/5">
-                                                <TableHead>Title</TableHead>
-                                                <TableHead>Status</TableHead>
+                            {/* Notifications in its own row to fix layout issue */}
+                            <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                <h3 className="text-lg font-semibold text-center text-primary mb-2">Notifications</h3>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-primary/5">
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {notifications.slice(0, 5).map((notification, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{notification.title}</TableCell>
+                                                <TableCell>{notification.status}</TableCell>
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {notifications.slice(0, 5).map((notification, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{notification.title}</TableCell>
-                                                    <TableCell>{notification.status}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                    <div className="flex justify-center mt-4">
-                                        <Link href="/protected/support-feedback" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Notifications</Link>
-                                    </div>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                <div className="flex justify-center mt-4">
+                                    <Link href="/protected/support-feedback" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Notifications</Link>
                                 </div>
                             </div>
                         </CardContent>
