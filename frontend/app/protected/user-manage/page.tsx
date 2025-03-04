@@ -146,7 +146,7 @@ export default function UserManagement() {
                                         <TableCell>{user.name}</TableCell>
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>{user.phone}</TableCell>
-                                        <TableCell>${user.wallet.toFixed(2)}</TableCell>
+                                        <TableCell>৳{user.wallet.toFixed(2)}</TableCell>
                                         <TableCell className="text-center">
                                             <Button variant="link" onClick={() => handleViewHistory(user)} className="text-blue-500 hover:underline">
                                                 View History

@@ -1,10 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import * as z from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Icons } from "@/components/ui/icons"
+
+const formSchema = z.object({
+    route_name: z.string().max(100, "Route Name must be less than 100 characters"),
+    start_station_id: z.string().max(50, "Start Station must be less than 50 characters"),
+    end_station_id: z.string().max(50, "End Station must be less than 50 characters"),
+})
 
 interface Route {
     route_id: number
@@ -16,46 +28,40 @@ interface Route {
 export default function RouteManage() {
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
-    // Fetch the list of routes from the FastAPI backend (dummy data for now)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            route_name: "",
+            start_station_id: "",
+            end_station_id: "",
+        },
+    })
+
+    const toggleModal = () => {
+        setIsModalOpen(!isModalOpen)
+    }
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        startTransition(async () => {
+            console.log(values)
+            form.reset()
+            toggleModal()
+        })
+    }
+
     useEffect(() => {
         async function fetchRoutes() {
-            // Uncomment and use this once the backend is ready
-            // try {
-            //     const response = await fetch("http://localhost:8000/routes")
-            //     const data = await response.json()
-            //     setRoutes(data)
-            // } catch (error) {
-            //     console.error("Error fetching routes:", error)
-            // } finally {
-            //     setLoading(false)
-            // }
-
-            // Dummy data for testing
             const dummyRoutes = [
-                {
-                    route_id: 1,
-                    route_name: "Route 1",
-                    start_station_id: "Station A",
-                    end_station_id: "Station B",
-                },
-                {
-                    route_id: 2,
-                    route_name: "Route 2",
-                    start_station_id: "Station B",
-                    end_station_id: "Station C",
-                },
-                {
-                    route_id: 3,
-                    route_name: "Route 3",
-                    start_station_id: "Station A",
-                    end_station_id: "Station C",
-                },
+                { route_id: 1, route_name: "Route 1", start_station_id: "Station A", end_station_id: "Station B" },
+                { route_id: 2, route_name: "Route 2", start_station_id: "Station B", end_station_id: "Station C" },
+                { route_id: 3, route_name: "Route 3", start_station_id: "Station A", end_station_id: "Station C" },
             ]
             setRoutes(dummyRoutes)
             setLoading(false)
         }
-
         fetchRoutes()
     }, [])
 
@@ -70,7 +76,6 @@ export default function RouteManage() {
                         Here you can manage routes, optimize metro system routes, and monitor route performance.
                     </p>
                     <div className="space-y-4 mt-6">
-                        {/* Route table */}
                         {loading ? (
                             <p>Loading routes...</p>
                         ) : (
@@ -91,11 +96,7 @@ export default function RouteManage() {
                                             <TableCell>{route.start_station_id}</TableCell>
                                             <TableCell>{route.end_station_id}</TableCell>
                                             <TableCell className="text-center">
-                                                {/* Edit route link */}
-                                                <Link
-                                                    href={`/protected/edit-route/${route.route_id}`}
-                                                    className="text-blue-500 hover:underline"
-                                                >
+                                                <Link href={`/protected/edit-route/${route.route_id}`} className="text-blue-500 hover:underline">
                                                     Edit
                                                 </Link>
                                             </TableCell>
@@ -104,13 +105,86 @@ export default function RouteManage() {
                                 </TableBody>
                             </Table>
                         )}
-                        {/* Add Route button */}
                         <div className="mt-6 text-center">
-                            <Button className="px-4 py-2 bg-primary text-white rounded">Add Route</Button>
+                            <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Route</Button>
+                            {isModalOpen && (
+                                <div style={modalStyles}>
+                                    <div style={modalContentStyles}>
+                                        <h2 className="text-primary font-bold text-2xl">Route Form</h2>
+                                        <Form {...form}>
+                                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                                <FormField control={form.control} name="route_name" render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Route Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="text" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="start_station_id" render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Start Station</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="text" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )} />
+                                                <FormField control={form.control} name="end_station_id" render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>End Station</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="text" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )} />
+                                                <Button type="submit" className="w-full" disabled={isPending}>
+                                                    {isPending ? (
+                                                        <>
+                                                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                            Adding...
+                                                        </>
+                                                    ) : (
+                                                        "Add Route"
+                                                    )}
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                        <button onClick={toggleModal} style={closeButtonStyles}>Close</button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </CardContent>
             </Card>
         </div>
     )
+}
+
+const modalStyles: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+}
+
+const modalContentStyles: React.CSSProperties = {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '5px',
+    width: '300px',
+}
+
+const closeButtonStyles: React.CSSProperties = {
+    marginTop: '10px',
+    backgroundColor: 'red',
+    color: 'white',
+    border: 'none',
+    padding: '8px',
+    borderRadius: '5px',
 }
