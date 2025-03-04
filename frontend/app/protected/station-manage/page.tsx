@@ -290,6 +290,7 @@ const closeButtonStyles: React.CSSProperties = {
     marginTop: '10px',
     backgroundColor: 'red',
     color: 'white',
+    fontSize: '12px',
     border: 'none',
     padding: '8px',
     borderRadius: '5px',

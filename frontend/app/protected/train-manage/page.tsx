@@ -153,14 +153,30 @@ export default function TrainManage() {
 }
 
 const modalStyles: React.CSSProperties = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center'
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
 }
 
 const modalContentStyles: React.CSSProperties = {
-    backgroundColor: 'white', padding: '20px', borderRadius: '5px', width: '300px'
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '5px',
+    width: '300px'
 }
 
 const closeButtonStyles: React.CSSProperties = {
-    marginTop: '10px', backgroundColor: 'red', color: 'white', border: 'none', padding: '8px', borderRadius: '5px'
+    marginTop: '10px',
+    backgroundColor: 'red',
+    color: 'white',
+    fontSize: '12px',
+    border: 'none',
+    padding: '8px',
+    borderRadius: '5px'
 }
