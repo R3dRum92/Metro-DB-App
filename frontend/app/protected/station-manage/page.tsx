@@ -83,6 +83,7 @@ export async function addStation(formData: FormData): Promise<addStationActionRe
 export default function StationManage() {
     const [stations, setStations] = useState<Station[]>([])
     const [loading, setLoading] = useState<boolean>(true)
+    const [searchQuery, setSearchQuery] = useState("");
     const [isPending, startTransition] = useTransition()
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -137,6 +138,11 @@ export default function StationManage() {
         fetchStations()
     }, [])
 
+    const filteredStations = stations.filter((station) =>
+        station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        station.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
 
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
@@ -145,9 +151,25 @@ export default function StationManage() {
                     <CardTitle className="text-primary text-2xl font-bold text-center">Station Management</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-center text-sm text-gray-500">
+                    <p className="text-center text-sm text-gray-500 mb-6">
                         Here you can manage stations, view schedules, and monitor station health.
                     </p>
+
+                    <div className="flex flex-col items-center space-y-4 mb-6">
+                        <div className="relative flex-grow w-full max-w-md">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <SearchIcon className="h-5 w-5 text-primary/70" />
+                            </div>
+                            <Input
+                                type="search"
+                                placeholder="Search stations by name or location"
+                                className="pl-10 pr-4 py-2 w-full border border-primary/20 focus:ring-2 focus:ring-primary/30 rounded-lg"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-4 mt-6">
                         {/* Station table */}
                         {loading ? (
@@ -227,6 +249,7 @@ export default function StationManage() {
                                                             Adding...
                                                         </>
                                                     ) : (
+
                                                         "Add Station"
 
                                                     )}
@@ -274,4 +297,24 @@ const closeButtonStyles: React.CSSProperties = {
     border: 'none',
     padding: '8px',
     borderRadius: '5px',
+}
+
+function SearchIcon(props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+        </svg>
+    )
 }
