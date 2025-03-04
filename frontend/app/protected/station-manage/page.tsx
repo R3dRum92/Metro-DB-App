@@ -207,7 +207,7 @@ export default function StationManage() {
                             {isModalOpen && (
                                 <div style={modalStyles}>
                                     <div style={modalContentStyles}>
-                                        <h2>My Form</h2>
+                                        <h2 className="text-primary font-bold text-2xl">Station Form</h2>
                                         <Form {...form}>
                                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                                 {/* name Field */}
@@ -290,7 +290,8 @@ const closeButtonStyles: React.CSSProperties = {
     marginTop: '10px',
     backgroundColor: 'red',
     color: 'white',
+    fontSize: '12px',
     border: 'none',
-    padding: '10px',
+    padding: '8px',
     borderRadius: '5px',
 }
