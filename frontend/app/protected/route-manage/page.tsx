@@ -12,11 +12,18 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Icons } from "@/components/ui/icons"
 
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 const formSchema = z.object({
     route_name: z.string().max(100, "Route Name must be less than 100 characters"),
     start_station_id: z.string().max(50, "Start Station must be less than 50 characters"),
     end_station_id: z.string().max(50, "End Station must be less than 50 characters"),
 })
+
+interface Station {
+    id: string
+    name: string
+}
 
 interface Route {
     route_id: number
@@ -25,11 +32,35 @@ interface Route {
     end_station_id: string
 }
 
+const fetchStations = async () => {
+    const response = await fetch("http://localhost:8000/stations")
+    const data = await response.json()
+    return data
+}
+
 export default function RouteManage() {
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const [stations, setStations] = useState<Station[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        const getStations = async () => {
+            try {
+                const data = await fetchStations()
+                console.log(data)
+                setStations(data)
+            } catch (error) {
+                console.error("Error fetching stations:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        getStations()
+    }, [])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -124,17 +155,43 @@ export default function RouteManage() {
                                                 <FormField control={form.control} name="start_station_id" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>Start Station</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="text" {...field} />
-                                                        </FormControl>
+                                                        <Select>
+                                                            <SelectTrigger className="w-[280px]">
+                                                                <SelectValue placeholder="Select a station" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {isLoading ? (
+                                                                    <div>Loading...</div>
+                                                                ) : (
+                                                                    stations.map((station: Station) => (
+                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                            {station.name}
+                                                                        </SelectItem>
+                                                                    ))
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
                                                     </FormItem>
                                                 )} />
                                                 <FormField control={form.control} name="end_station_id" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>End Station</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="text" {...field} />
-                                                        </FormControl>
+                                                        <Select>
+                                                            <SelectTrigger className="w-[280px]">
+                                                                <SelectValue placeholder="Select a station" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {isLoading ? (
+                                                                    <div>Loading...</div>
+                                                                ) : (
+                                                                    stations.map((station: Station) => (
+                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                            {station.name}
+                                                                        </SelectItem>
+                                                                    ))
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
                                                     </FormItem>
                                                 )} />
                                                 <Button type="submit" className="w-full" disabled={isPending}>
