@@ -2,8 +2,9 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from zoneinfo import ZoneInfo
 
-app = FastAPI()
+from dateutil.relativedelta import relativedelta
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -14,6 +15,9 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.db.connection import get_db_connection
 from app.db.init_db import create_tables
 from app.utils.logger import logger
+
+app = FastAPI()
+
 
 # JWT configuration
 SECRET_KEY = "I love autoshy"
@@ -65,6 +69,11 @@ class SigninRequest(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+class AddStationRequest(BaseModel):
+    name: str
+    location: str
+
+
 class SignupResponse(BaseModel):
     success: bool
     message: str
@@ -105,7 +114,6 @@ app.add_middleware(
 )
 
 
-
 # @app.on_event("startup")
 # async def startup():
 #     from app.db.init_db import run_migrations
@@ -113,11 +121,9 @@ app.add_middleware(
 #     run_migrations()
 
 
-
 @app.get("/")
 async def root():
     return {"message": "Metro System API is up and running!"}
-
 
 
 @app.get("/users")
@@ -126,7 +132,11 @@ async def get_users():
         conn = await get_db_connection()
 
         try:
-            rows = await conn.fetch("SELECT * FROM users")
+            rows = await conn.fetch(
+                """
+                SELECT * FROM users JOIN wallets on users.id = wallets.user_id
+                """
+            )
             # return rows
             # logger.info(result)
             users = [
@@ -135,7 +145,7 @@ async def get_users():
                     name=row["name"],
                     email=row["email"],
                     phone=row["phone_number"],
-                    wallet=150.0,
+                    wallet=row["balance"],
                     history="/protected/user-history/" + str(row["id"]),
                 )
                 for row in rows
@@ -152,7 +162,6 @@ async def get_users():
             await conn.close()
     except Exception as e:
         pass
-
 
 
 @app.get("/test-db")
@@ -201,6 +210,9 @@ async def signup(user: SignupRequest):
                 )
 
             user_id = str(uuid.uuid4())
+            wallet_id = str(uuid.uuid4())
+            current_time = datetime.now()
+            valid_until = current_time + relativedelta(years=5)
             await conn.execute(
                 """
                 INSERT INTO users (id, email, password_hash, name, phone_number) VALUES ($1, $2, $3, $4, $5)
@@ -211,7 +223,21 @@ async def signup(user: SignupRequest):
                 user.name,
                 user.phone,
             )
-            return {"message": "Sign up successful", "user_id": user_id}
+            await conn.execute(
+                """
+                INSERT INTO wallets(ticket_id, user_id, balance, valid_from, valid_until) VALUES ($1, $2, $3, $4, $5)
+                """,
+                wallet_id,
+                user_id,
+                300.0,
+                current_time,
+                valid_until,
+            )
+            return {
+                "message": "Sign up successful",
+                "user_id": user_id,
+                "wallet_id": wallet_id,
+            }
 
         except HTTPException as e:
             raise e
@@ -270,3 +296,27 @@ async def signin(form_data: SigninRequest):
             detail="Failed to process sign in. Please try again later.",
         )
 
+
+@app.post("/add_station")
+async def add_station(form_data: AddStationRequest):
+    try:
+        conn = await get_db_connection()
+        station_id = uuid.uuid4()
+        await conn.execute(
+            """
+            INSERT INTO stations(station_id, station_name, location) VALUES ($1, $2, $3)
+            """,
+            station_id,
+            form_data.name,
+            form_data.location,
+        )
+        return {
+            "message": f"Successfully added {form_data.name} Station at {form_data.location}",
+            "station_id": station_id,
+        }
+    except Exception as e:
+        logger.info(f"Failed to connect to the database.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to connect to the database. Please try again.",
+        ) from e
