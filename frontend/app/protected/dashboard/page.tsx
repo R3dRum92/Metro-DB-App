@@ -12,32 +12,20 @@ export default function Dashboard() {
     const [stations, setStations] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(true)
 
-    // Fetch data from the backend (using dummy data for now)
+    // Fetch data from the backend
     useEffect(() => {
-        async function fetchData() {
-            // Dummy Data for Testing
-            const dummyRoutes = [
-                { route_name: "Route 1", stations: "Station 1, Station 2" },
-                { route_name: "Route 2", stations: "Station 3, Station 4" },
-                { route_name: "Route 3", stations: "Station 5, Station 6" },
-            ]
-            const dummyTrains = [
-                { train_name: "Train 1", status: "Running" },
-                { train_name: "Train 2", status: "Delayed" },
-                { train_name: "Train 3", status: "Running" },
-            ]
-            const dummyStations = [
-                { station_name: "Station 1", status: "Active" },
-                { station_name: "Station 2", status: "Under Maintenance" },
-                { station_name: "Station 3", status: "Active" },
-            ]
-            setRoutes(dummyRoutes)
-            setTrains(dummyTrains)
-            setStations(dummyStations)
-            setLoading(false)
+        async function fetchStations() {
+            try {
+                const response = await fetch("http://localhost:8000/stations")
+                if (!response.ok) throw new Error("Failed to fetch stations")
+                setStations(await response.json())
+            } catch (error) {
+                console.error("Error:", error)
+            } finally {
+                setLoading(false)
+            }
         }
-
-        fetchData()
+        fetchStations()
     }, [])
 
     return (
@@ -147,14 +135,14 @@ export default function Dashboard() {
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
                                                 <TableHead>Station Name</TableHead>
-                                                <TableHead>Status</TableHead>
+                                                <TableHead>Location</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {stations.slice(0, 5).map((station, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>{station.station_name}</TableCell>
-                                                    <TableCell>{station.status}</TableCell>
+                                                    <TableCell>{station.name}</TableCell>
+                                                    <TableCell>{station.location}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
