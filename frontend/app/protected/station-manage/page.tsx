@@ -20,7 +20,7 @@ const formSchema = z.object({
 
 interface Station {
     station_id: number
-    station_name: string
+    name: string
     location: string
 }
 
@@ -120,41 +120,23 @@ export default function StationManage() {
     // Fetch the list of stations from the FastAPI backend (dummy data for now)
     useEffect(() => {
         async function fetchStations() {
-            // Uncomment and use this once the backend is ready
-            // try {
-            //     const response = await fetch("http://localhost:8000/stations")
-            //     const data = await response.json()
-            //     setStations(data)
-            // } catch (error) {
-            //     console.error("Error fetching stations:", error)
-            // } finally {
-            //     setLoading(false)
-            // }
+            try {
+                const response = await fetch("http://localhost:8000/stations")
+                if (!response.ok) {
+                    throw new Error(`Error fetching stations: ${response.statusText}`)
+                }
+                const data: Station[] = await response.json()
+                setStations(data)
+            } catch (error) {
+                console.error("Error fetching stations:", error)
+            } finally {
+                setLoading(false)
+            }
 
-            // Dummy data for testing
-            const dummyStations = [
-                {
-                    station_id: 1,
-                    station_name: "Station A",
-                    location: "Downtown",
-                },
-                {
-                    station_id: 2,
-                    station_name: "Station B",
-                    location: "Uptown",
-                },
-                {
-                    station_id: 3,
-                    station_name: "Station C",
-                    location: "Suburbs",
-                },
-            ]
-            setStations(dummyStations)
-            setLoading(false)
         }
-
         fetchStations()
     }, [])
+
 
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
@@ -183,7 +165,7 @@ export default function StationManage() {
                                 <TableBody>
                                     {stations.map((station) => (
                                         <TableRow key={station.station_id}>
-                                            <TableCell>{station.station_name}</TableCell>
+                                            <TableCell>{station.name}</TableCell>
                                             <TableCell>{station.location}</TableCell>
                                             <TableCell className="text-center">
                                                 {/* Edit station link */}
@@ -242,7 +224,7 @@ export default function StationManage() {
                                                     {isPending ? (
                                                         <>
                                                             <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                                                            Signing up...
+                                                            Adding...
                                                         </>
                                                     ) : (
                                                         <>

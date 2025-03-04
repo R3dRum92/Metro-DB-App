@@ -51,26 +51,6 @@ export default function UserManagement() {
             } finally {
                 setLoading(false)
             }
-
-            // // Dummy data for testing
-            // const dummyUsers = [
-            //     {
-            //         id: 1,
-            //         name: "John Doe",
-            //         email: "john.doe@example.com",
-            //         phone: "01771234567",
-            //         wallet: 150.0,
-            //     },
-            //     {
-            //         id: 2,
-            //         name: "Jane Smith",
-            //         email: "jane.smith@example.com",
-            //         phone: "01819876543",
-            //         wallet: 200.0,
-            //     }
-            // ]
-            // setUsers(dummyUsers)
-            // setLoading(false)
         }
 
         fetchUsers()
@@ -117,7 +97,7 @@ export default function UserManagement() {
             {/* Heading Section */}
             <Card className="w-full max-w-4xl">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-center">User Management</CardTitle>
+                    <CardTitle className="text-primary text-2xl font-bold text-center">User Management</CardTitle>
                     <CardDescription className="text-center">Manage users, view profiles, and handle user access.</CardDescription>
                 </CardHeader>
             </Card>

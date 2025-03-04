@@ -10,8 +10,6 @@ export default function Dashboard() {
     const [routes, setRoutes] = useState<any[]>([])
     const [trains, setTrains] = useState<any[]>([])
     const [stations, setStations] = useState<any[]>([])
-    const [maintenance, setMaintenance] = useState<any[]>([])
-    const [notifications, setNotifications] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(true)
 
     // Fetch data from the backend (using dummy data for now)
@@ -33,22 +31,9 @@ export default function Dashboard() {
                 { station_name: "Station 2", status: "Under Maintenance" },
                 { station_name: "Station 3", status: "Active" },
             ]
-            const dummyMaintenance = [
-                { task: "Track Repair", status: "Completed" },
-                { task: "Train Service Check", status: "In Progress" },
-                { task: "Station Cleaning", status: "Completed" },
-            ]
-            const dummyNotifications = [
-                { title: "Holiday Schedule", status: "Active" },
-                { title: "New Train Added", status: "Active" },
-                { title: "Maintenance Alert", status: "Expired" },
-            ]
-
             setRoutes(dummyRoutes)
             setTrains(dummyTrains)
             setStations(dummyStations)
-            setMaintenance(dummyMaintenance)
-            setNotifications(dummyNotifications)
             setLoading(false)
         }
 
@@ -82,9 +67,6 @@ export default function Dashboard() {
                                         { href: "/protected/train-manage", label: "Train Management" },
                                         { href: "/protected/route-manage", label: "Route Management" },
                                         { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
-                                        { href: "/protected/reporting-analytics", label: "Reporting & Analytics" },
-                                        { href: "/protected/maintenance-operations", label: "Maintenance & Operations" },
-                                        { href: "/protected/support-feedback", label: "Support & Feedback" },
                                     ].map((item, index) => (
                                         <li key={index} className="border-b border-primary/10">
                                             <Link
@@ -180,54 +162,6 @@ export default function Dashboard() {
                                     <div className="flex justify-center mt-4">
                                         <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
                                     </div>
-                                </div>
-
-                                {/* Displaying first 5 rows of Maintenance & Operations */}
-                                <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Maintenance & Operations</h3>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-primary/5">
-                                                <TableHead>Task</TableHead>
-                                                <TableHead>Status</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {maintenance.slice(0, 5).map((task, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{task.task}</TableCell>
-                                                    <TableCell>{task.status}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                    <div className="flex justify-center mt-4">
-                                        <Link href="/protected/maintenance-operations" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Maintenance</Link>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Notifications in its own row to fix layout issue */}
-                            <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                <h3 className="text-lg font-semibold text-center text-primary mb-2">Notifications</h3>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="bg-primary/5">
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Status</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {notifications.slice(0, 5).map((notification, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell>{notification.title}</TableCell>
-                                                <TableCell>{notification.status}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                                <div className="flex justify-center mt-4">
-                                    <Link href="/protected/support-feedback" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Notifications</Link>
                                 </div>
                             </div>
                         </CardContent>
