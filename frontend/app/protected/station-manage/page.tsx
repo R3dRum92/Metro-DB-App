@@ -228,7 +228,7 @@ export default function StationManage() {
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <Icons.lock className="mr-2 h-4 w-4" />
+                                                            <Icons.spinner className="mr-2 h-4 w-4" />
                                                             Add Station
                                                         </>
                                                     )}
