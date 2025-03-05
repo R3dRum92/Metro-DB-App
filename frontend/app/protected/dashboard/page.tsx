@@ -14,18 +14,31 @@ export default function Dashboard() {
 
     // Fetch data from the backend
     useEffect(() => {
-        async function fetchStations() {
+        async function fetchData() {
+            setLoading(true)
             try {
-                const response = await fetch("http://localhost:8000/stations")
-                if (!response.ok) throw new Error("Failed to fetch stations")
-                setStations(await response.json())
+                //station
+                const stationsResponse = await fetch("http://localhost:8000/stations")
+                if (!stationsResponse.ok) throw new Error("Failed to fetch stations")
+                setStations(await stationsResponse.json())
+
+                //routes
+                const routesResponse = await fetch("http://localhost:8000/routes")
+                if (!routesResponse.ok) throw new Error("Failed to fetch stations")
+                setRoutes(await routesResponse.json())
+
+                //trains
+                const trainsResponse = await fetch("http://localhost:8000/trains")
+                if (!trainsResponse.ok) throw new Error("Failed to fetch stations")
+                setTrains(await trainsResponse.json())
+
             } catch (error) {
                 console.error("Error:", error)
             } finally {
                 setLoading(false)
             }
         }
-        fetchStations()
+        fetchData()
     }, [])
 
     return (
@@ -87,14 +100,16 @@ export default function Dashboard() {
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
                                                 <TableHead>Route Name</TableHead>
-                                                <TableHead>Stations</TableHead>
+                                                <TableHead>Start Station</TableHead>
+                                                <TableHead>End Station</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {routes.slice(0, 5).map((route, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell>{route.route_name}</TableCell>
-                                                    <TableCell>{route.stations}</TableCell>
+                                                    <TableCell>{route.start_station_name}</TableCell>
+                                                    <TableCell>{route.end_station_name}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -110,15 +125,25 @@ export default function Dashboard() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
-                                                <TableHead>Train Name</TableHead>
+                                                <TableHead>Train Code</TableHead>
+                                                <TableHead>Route Name</TableHead>
                                                 <TableHead>Status</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {trains.slice(0, 5).map((train, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>{train.train_name}</TableCell>
-                                                    <TableCell>{train.status}</TableCell>
+                                                    <TableCell>{train.train_code}</TableCell>
+                                                    <TableCell>{train.route_name}</TableCell>
+                                                    <TableCell>{train.operational_status}</TableCell>
+                                                    {/* <TableCell>
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${train.operational_status === 'active'
+                                                            ? 'bg-green-100 text-green-800'
+                                                            : 'bg-red-100 text-red-800'
+                                                            }`}>
+                                                            {train.operational_status}
+                                                        </span>
+                                                    </TableCell> */}
                                                 </TableRow>
                                             ))}
                                         </TableBody>

@@ -25,11 +25,14 @@ interface Train {
     route_id: number
     capacity: number
     operational_status: string
+    route_name?: string
 }
 
 interface Route {
     route_id: number
     route_name: string
+    start_station_name: string
+    end_station_name: string
 }
 
 const fetchRoutes = async () => {
@@ -103,6 +106,7 @@ export async function addTrain(formData: FormData):
 
 export default function TrainManage() {
     const [trains, setTrains] = useState<Train[]>([])
+    const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -117,6 +121,18 @@ export default function TrainManage() {
             operational_status: "",
         },
     })
+
+    useEffect(() => {
+        async function loadRoutes() {
+            try {
+                const routeData = await fetchRoutes()
+                setRoutes(routeData)
+            } catch (error) {
+                console.error("Error fetching routes:", error)
+            }
+        }
+        loadRoutes()
+    }, [])
 
     useEffect(() => {
         async function fetchTrains() {
@@ -135,6 +151,11 @@ export default function TrainManage() {
         }
         fetchTrains()
     }, [])
+
+    const getRouteNameById = (routeId: number) => {
+        const route = routes.find(r => r.route_id === routeId)
+        return route ? route.route_name : `Unknown Route (${routeId})`
+    }
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen)
@@ -184,7 +205,7 @@ export default function TrainManage() {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Train Code</TableHead>
-                                        <TableHead>Route ID</TableHead>
+                                        <TableHead>Route Name</TableHead>
                                         <TableHead>Capacity</TableHead>
                                         <TableHead>Operational Status</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
@@ -194,7 +215,7 @@ export default function TrainManage() {
                                     {filteredTrains.map((train) => (
                                         <TableRow key={train.train_id}>
                                             <TableCell>{train.train_code}</TableCell>
-                                            <TableCell>{train.route_id}</TableCell>
+                                            <TableCell>{getRouteNameById(train.route_id)}</TableCell>
                                             <TableCell>{train.capacity}</TableCell>
                                             <TableCell>{train.operational_status}</TableCell>
                                             <TableCell className="text-center">
