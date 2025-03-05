@@ -30,6 +30,8 @@ interface Route {
     route_name: string
     start_station_id: string
     end_station_id: string
+    start_station_name: string
+    end_station_name: string
 }
 
 const fetchStations = async () => {
