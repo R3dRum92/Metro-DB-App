@@ -185,7 +185,7 @@ export default function StationManage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {stations.map((station) => (
+                                    {filteredStations.map((station) => (
                                         <TableRow key={station.station_id}>
                                             <TableCell>{station.name}</TableCell>
                                             <TableCell>{station.location}</TableCell>

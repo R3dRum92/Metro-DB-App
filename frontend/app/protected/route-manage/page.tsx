@@ -99,6 +99,7 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
 export default function RouteManage() {
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
+    const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [stations, setStations] = useState<Station[]>([])
@@ -164,6 +165,11 @@ export default function RouteManage() {
         fetchRoutes()
     }, [])
 
+    const filteredStations = routes.filter((route) =>
+        route.route_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        route.start_station_id.toLowerCase().includes(searchQuery.toLowerCase()) || route.end_station_id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
             <Card className="w-full max-w-4xl">
@@ -171,9 +177,25 @@ export default function RouteManage() {
                     <CardTitle className="text-primary text-2xl font-bold text-center">Route Management</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-center text-sm text-gray-500">
+                    <p className="text-center text-sm text-gray-500 mb-6">
                         Here you can manage routes, optimize metro system routes, and monitor route performance.
                     </p>
+
+                    <div className="flex flex-col items-center space-y-4 mb-6">
+                        <div className="relative flex-grow w-full max-w-md">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <SearchIcon className="h-5 w-5 text-primary/70" />
+                            </div>
+                            <Input
+                                type="search"
+                                placeholder="Search routes by name or station"
+                                className="pl-10 pr-4 py-2 w-full border border-primary/20 focus:ring-2 focus:ring-primary/30 rounded-lg"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-4 mt-6">
                         {loading ? (
                             <p>Loading routes...</p>
@@ -189,7 +211,7 @@ export default function RouteManage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {routes.map((route) => (
+                                    {filteredStations.map((route) => (
                                         <TableRow key={route.route_id}>
                                             <TableCell>{route.route_name}</TableCell>
                                             <TableCell>{route.start_station_id}</TableCell>
@@ -313,4 +335,24 @@ const closeButtonStyles: React.CSSProperties = {
     border: 'none',
     padding: '6px',
     borderRadius: '5px',
+}
+
+function SearchIcon(props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+        </svg>
+    )
 }

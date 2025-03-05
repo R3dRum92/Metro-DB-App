@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import React from "react"
 
 const formSchema = z.object({
     train_code: z.string().max(10, "Train Code must be less than 10 characters"),
@@ -29,6 +30,7 @@ interface Train {
 export default function TrainManage() {
     const [trains, setTrains] = useState<Train[]>([])
     const [loading, setLoading] = useState<boolean>(true)
+    const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
 
@@ -67,6 +69,11 @@ export default function TrainManage() {
         })
     }
 
+    const filteredTrains = trains.filter((train) =>
+        train.train_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        train.operational_status.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
             <Card className="w-full max-w-4xl">
@@ -74,7 +81,21 @@ export default function TrainManage() {
                     <CardTitle className="text-primary text-2xl font-bold text-center">Train Management</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-center text-sm text-gray-500">Here you can monitor train statuses, manage schedules, and perform maintenance tasks.</p>
+                    <p className="text-center text-sm text-gray-500 mb-6">Here you can monitor train statuses, manage schedules, and perform maintenance tasks.</p>
+                    <div className="flex flex-col items-center space-y-4 mb-6">
+                        <div className="relative flex-grow w-full max-w-md">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <SearchIcon className="h-5 w-5 text-primary/70" />
+                            </div>
+                            <Input
+                                type="search"
+                                placeholder="Search trains by code or status"
+                                className="pl-10 pr-4 py-2 w-full border border-primary/20 focus:ring-2 focus:ring-primary/30 rounded-lg"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
                     <div className="space-y-4 mt-6">
                         {loading ? (
                             <p>Loading trains...</p>
@@ -91,7 +112,7 @@ export default function TrainManage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {trains.map((train) => (
+                                    {filteredTrains.map((train) => (
                                         <TableRow key={train.train_id}>
                                             <TableCell>{train.train_code}</TableCell>
                                             <TableCell>{train.route_id}</TableCell>
@@ -179,4 +200,24 @@ const closeButtonStyles: React.CSSProperties = {
     border: 'none',
     padding: '8px',
     borderRadius: '5px'
+}
+
+function SearchIcon(props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+        </svg>
+    )
 }
