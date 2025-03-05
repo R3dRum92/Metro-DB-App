@@ -38,6 +38,64 @@ const fetchStations = async () => {
     return data
 }
 
+export type addRouteActionResult = {
+    success?: boolean
+    message?: string
+    errors?: Record<string, string[]>
+}
+
+export async function addRoute(formData: FormData): Promise<addRouteActionResult> {
+    const validatedFields = formSchema.safeParse({
+        route_name: formData.get("route_name"),
+        start_station_id: formData.get("start_station_id"),
+        end_station_id: formData.get("end_station_id")
+    })
+
+    if (!validatedFields.success) {
+        return { errors: validatedFields.error.flatten().fieldErrors }
+    }
+
+    const { route_name, start_station_id, end_station_id } = validatedFields.data
+
+    try {
+        const response = await fetch("http://localhost:8000/add_route", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                route_name,
+                start_station_id,
+                end_station_id
+            })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            console.log(error.detail)
+            return {
+                success: false,
+                message: "Adding Routes Failed",
+                errors: error.detail.errors || { form: ["Server error occurred"] }
+            }
+        }
+
+        const data = await response.json()
+
+        return {
+            success: true,
+            message: data.message || "Successful"
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            success: false,
+            message: "Failed to connect to server",
+            errors: { form: ["Network error occurred"] }
+        }
+    }
+}
+
 export default function RouteManage() {
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
@@ -77,9 +135,19 @@ export default function RouteManage() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         startTransition(async () => {
+            const formData = new FormData()
+            Object.entries(values).forEach(([Key, value]) => formData.append(Key, value))
+
             console.log(values)
-            form.reset()
-            toggleModal()
+
+            const result = await addRoute(formData)
+            console.log(result)
+            if (result?.errors) {
+
+            } else {
+                form.reset()
+                toggleModal()
+            }
         })
     }
 
@@ -155,7 +223,7 @@ export default function RouteManage() {
                                                 <FormField control={form.control} name="start_station_id" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>Start Station</FormLabel>
-                                                        <Select>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                                             <SelectTrigger className="w-[280px]">
                                                                 <SelectValue placeholder="Select a station" />
                                                             </SelectTrigger>
@@ -164,7 +232,7 @@ export default function RouteManage() {
                                                                     <div>Loading...</div>
                                                                 ) : (
                                                                     stations.map((station: Station) => (
-                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                        <SelectItem value={station.id}>
                                                                             {station.name}
                                                                         </SelectItem>
                                                                     ))
@@ -176,7 +244,7 @@ export default function RouteManage() {
                                                 <FormField control={form.control} name="end_station_id" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>End Station</FormLabel>
-                                                        <Select>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                                             <SelectTrigger className="w-[280px]">
                                                                 <SelectValue placeholder="Select a station" />
                                                             </SelectTrigger>
