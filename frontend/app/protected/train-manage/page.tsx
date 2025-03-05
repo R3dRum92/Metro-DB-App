@@ -27,6 +27,80 @@ interface Train {
     operational_status: string
 }
 
+interface Route {
+    route_id: number
+    route_name: string
+}
+
+const fetchRoutes = async () => {
+    const response = await fetch("http://localhost:8000/routes")
+    const data = await response.json()
+    return data
+}
+
+export type addTrainActionResult = {
+    success?: boolean
+    message?: string
+    errors?: Record<string, string[]>
+}
+
+export async function addTrain(formData: FormData):
+    Promise<addTrainActionResult> {
+    const validatedFields = formSchema.safeParse({
+        train_code: formData.get("train_code"),
+        route_id: formData.get("route_id"),
+        capacity: formData.get("capacity"),
+        operational_status: formData.get("operational_status")
+    })
+
+    if (!validatedFields.success) {
+        return { errors: validatedFields.error.flatten().fieldErrors }
+    }
+
+    const { train_code, route_id, capacity, operational_status } = validatedFields.data
+
+    try {
+        const response = await fetch("http://localhost:8000/add_train", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                train_code,
+                route_id,
+                capacity,
+                operational_status,
+            })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            console.log(error.detail)
+            return {
+                success: false,
+                message: "Adding Trains Failed",
+                errors: error.detail.errors || { form: ["Server error occurred"] }
+            }
+        } else {
+            window.location.reload()
+        }
+
+        const data = await response.json()
+
+        return {
+            success: true,
+            message: data.message || "Successful"
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            success: false,
+            message: "Failed to connect to server",
+            errors: { form: ["Network error occurred"] },
+        }
+    }
+}
+
 export default function TrainManage() {
     const [trains, setTrains] = useState<Train[]>([])
     const [loading, setLoading] = useState<boolean>(true)
@@ -46,13 +120,18 @@ export default function TrainManage() {
 
     useEffect(() => {
         async function fetchTrains() {
-            const dummyTrains = [
-                { train_id: 1, train_code: "T001", route_id: 1, capacity: 100, operational_status: "Active" },
-                { train_id: 2, train_code: "T002", route_id: 2, capacity: 150, operational_status: "Maintenance" },
-                { train_id: 3, train_code: "T003", route_id: 3, capacity: 120, operational_status: "Active" },
-            ]
-            setTrains(dummyTrains)
-            setLoading(false)
+            try {
+                const response = await fetch("http://localhost:8000/trains")
+                if (!response.ok) {
+                    throw new Error(`Error fetching trains: ${response.statusText}`)
+                }
+                const data: Train[] = await response.json()
+                setTrains(data)
+            } catch (error) {
+                console.error("Error fetching trains:", error)
+            } finally {
+                setLoading(false)
+            }
         }
         fetchTrains()
     }, [])
