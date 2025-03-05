@@ -44,6 +44,8 @@ export type addRouteActionResult = {
     errors?: Record<string, string[]>
 }
 
+
+
 export async function addRoute(formData: FormData): Promise<addRouteActionResult> {
     const validatedFields = formSchema.safeParse({
         route_name: formData.get("route_name"),
@@ -78,6 +80,8 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
                 message: "Adding Routes Failed",
                 errors: error.detail.errors || { form: ["Server error occurred"] }
             }
+        } else {
+            window.location.reload()
         }
 
         const data = await response.json()
@@ -154,13 +158,24 @@ export default function RouteManage() {
 
     useEffect(() => {
         async function fetchRoutes() {
-            const dummyRoutes = [
-                { route_id: 1, route_name: "Route 1", start_station_id: "Station A", end_station_id: "Station B" },
-                { route_id: 2, route_name: "Route 2", start_station_id: "Station B", end_station_id: "Station C" },
-                { route_id: 3, route_name: "Route 3", start_station_id: "Station A", end_station_id: "Station C" },
-            ]
-            setRoutes(dummyRoutes)
-            setLoading(false)
+            try {
+                const response = await fetch("http://localhost:8000/routes")
+
+                console.log(response)
+
+                if (!response.ok) {
+                    throw new Error(`Error fetching routes: ${response.statusText}`)
+                }
+
+                const data: Route[] = await response.json()
+                console.log(data)
+                setRoutes(data)
+            } catch (error) {
+                console.error("Error fetching routes:", error)
+                return null
+            } finally {
+                setLoading(false)
+            }
         }
         fetchRoutes()
     }, [])
@@ -214,8 +229,8 @@ export default function RouteManage() {
                                     {filteredStations.map((route) => (
                                         <TableRow key={route.route_id}>
                                             <TableCell>{route.route_name}</TableCell>
-                                            <TableCell>{route.start_station_id}</TableCell>
-                                            <TableCell>{route.end_station_id}</TableCell>
+                                            <TableCell>{route.start_station_name}</TableCell>
+                                            <TableCell>{route.end_station_name}</TableCell>
                                             <TableCell className="text-center">
                                                 <Link href={`/protected/edit-route/${route.route_id}`} className="text-blue-500 hover:underline">
                                                     Edit

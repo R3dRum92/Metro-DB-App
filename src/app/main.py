@@ -92,12 +92,20 @@ class StationResponse(BaseModel):
     id: uuid.UUID
     name: str
     location: str
+    status: str
 
 
 class AddRouteRequest(BaseModel):
     route_name: str
     start_station_id: str
     end_station_id: str
+
+
+class RouteResponse(BaseModel):
+    route_id: uuid.UUID
+    route_name: str
+    start_station_name: str
+    end_station_name: str
 
 
 @asynccontextmanager
@@ -181,13 +189,52 @@ async def get_stations():
     try:
         conn = await get_db_connection()
         try:
-            rows = await conn.fetch("SELECT * FROM stations")
+            rows = await conn.fetch(
+                "SELECT * FROM stations ORDER BY status, location, station_name"
+            )
             print(rows)
             stations = [
                 StationResponse(
                     id=row["station_id"],
                     name=row["station_name"],
                     location=row["location"],
+                    status=row["status"],
+                )
+                for row in rows
+            ]
+            return stations
+        except Exception as e:
+            logger.error(f"Error fetching routes: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch stations. Please try again later.",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        pass
+
+
+@app.get("/routes", response_model=list[RouteResponse])
+async def get_stations():
+    try:
+        conn = await get_db_connection()
+        try:
+            rows = await conn.fetch(
+                """
+                SELECT r.route_id AS route_id, r.route_name AS route_name, s.station_name AS start_station_name, t.station_name AS end_station_name
+                FROM routes r 
+                    JOIN stations s ON r.start_station_id = s.station_id
+                    JOIN stations t ON r.end_station_id = t.station_id
+                """
+            )
+            print(rows)
+            stations = [
+                RouteResponse(
+                    route_id=row["route_id"],
+                    route_name=row["route_name"],
+                    start_station_name=row["start_station_name"],
+                    end_station_name=row["end_station_name"],
                 )
                 for row in rows
             ]

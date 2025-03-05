@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState, useTransition } from "react"
+import React, { ChangeEvent, useEffect, useState, useTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Icons } from "@/components/ui/icons"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const formSchema = z.object({
     name: z.string().max(100, "Station Name must be a less than 100 characters"),
@@ -22,6 +23,7 @@ interface Station {
     station_id: number
     name: string
     location: string
+    status: string
 }
 
 export type addStationActionResult = {
@@ -29,6 +31,8 @@ export type addStationActionResult = {
     message?: string
     errors?: Record<string, string[]>
 }
+
+type Filters = "active" | "inactive" | "maintenance" | "construction" | "planned" | "none"
 
 export async function addStation(formData: FormData): Promise<addStationActionResult> {
     const validatedFields = formSchema.safeParse({
@@ -62,6 +66,8 @@ export async function addStation(formData: FormData): Promise<addStationActionRe
                 message: "Adding Stations Failed",
                 errors: error.detail.errors || { form: ["Server error occurred"] }
             }
+        } else {
+            window.location.reload()
         }
 
         const data = await response.json()
@@ -83,10 +89,18 @@ export async function addStation(formData: FormData): Promise<addStationActionRe
 export default function StationManage() {
     const [stations, setStations] = useState<Station[]>([])
     const [loading, setLoading] = useState<boolean>(true)
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState("")
     const [isPending, startTransition] = useTransition()
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [filters, setFilters] = useState({
+        active: false,
+        inactive: false,
+        maintenance: false,
+        construction: false,
+        planned: false
+    })
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeFilter, setActiveFilter] = useState<Filters>("none")
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -138,10 +152,21 @@ export default function StationManage() {
         fetchStations()
     }, [])
 
-    const filteredStations = stations.filter((station) =>
-        station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        station.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const handleCheckboxChange = (filter: Filters) => {
+        if (activeFilter === filter) {
+            setActiveFilter("none") // Uncheck if already selected
+        } else {
+            setActiveFilter(filter) // Set the selected filter
+        }
+    }
+
+    const filteredStations = stations.filter((station) => {
+        const matchesSearchQuery = station.name.toLowerCase().includes(searchQuery.toLowerCase()) || station.location.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const matchesCheckboxes = (activeFilter === "active" && station.status === "active") || (activeFilter === "inactive" && station.status === "inactive") || (activeFilter === "maintenance" && station.status === "maintenance") || (activeFilter === "construction" && station.status === "construction") || (activeFilter === "planned" && station.status === "planned") || activeFilter === "none"
+
+        return matchesSearchQuery && matchesCheckboxes
+    });
 
 
     return (
@@ -168,6 +193,53 @@ export default function StationManage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+
+                        <div className="flex space-x-4">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="active" checked={activeFilter === "active"} onCheckedChange={() => handleCheckboxChange("active")}
+                                />
+                                <label htmlFor="active" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Active
+                                </label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="inactive" checked={activeFilter === "inactive"} onCheckedChange={() => handleCheckboxChange("inactive")}
+                                />
+                                <label htmlFor="Inactive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Inactive
+                                </label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="maintenance" checked={activeFilter === "maintenance"} onCheckedChange={() => handleCheckboxChange("maintenance")}
+                                />
+                                <label htmlFor="maintenance" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Maintenance
+                                </label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="construction" checked={activeFilter === "construction"} onCheckedChange={() => handleCheckboxChange("construction")}
+                                />
+                                <label htmlFor="construction" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Construction
+                                </label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="planned" checked={activeFilter === "planned"} onCheckedChange={() => handleCheckboxChange("planned")}
+                                />
+                                <label htmlFor="planned" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Planned
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="space-y-4 mt-6">
@@ -181,6 +253,7 @@ export default function StationManage() {
                                     <TableRow>
                                         <TableHead>Station Name</TableHead>
                                         <TableHead>Location</TableHead>
+                                        <TableHead>Status</TableHead>
                                         <TableHead className="text-center">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -189,6 +262,7 @@ export default function StationManage() {
                                         <TableRow key={station.station_id}>
                                             <TableCell>{station.name}</TableCell>
                                             <TableCell>{station.location}</TableCell>
+                                            <TableCell>{station.status}</TableCell>
                                             <TableCell className="text-center">
                                                 {/* Edit station link */}
                                                 <Link
