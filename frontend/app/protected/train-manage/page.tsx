@@ -230,7 +230,7 @@ export default function TrainManage() {
                                     {filteredTrains.map((train) => (
                                         <TableRow key={train.train_id}>
                                             <TableCell>{train.train_code}</TableCell>
-                                            <TableCell>{train.route_id}</TableCell>
+                                            <TableCell>{train.route_name}</TableCell>
                                             <TableCell>{train.capacity}</TableCell>
                                             <TableCell>{train.operational_status}</TableCell>
                                             <TableCell className="text-center">

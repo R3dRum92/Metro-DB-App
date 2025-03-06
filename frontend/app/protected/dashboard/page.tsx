@@ -67,7 +67,7 @@ export default function Dashboard() {
                                         { href: "/protected/station-manage", label: "Station Management" },
                                         { href: "/protected/train-manage", label: "Train Management" },
                                         { href: "/protected/route-manage", label: "Route Management" },
-                                        { href: "/protected/ticketing-pricing", label: "Ticketing & Pricing" },
+                                        { href: "/protected/ticket-manage", label: "Ticketing & Pricing" },
                                     ].map((item, index) => (
                                         <li key={index} className="border-b border-primary/10">
                                             <Link
