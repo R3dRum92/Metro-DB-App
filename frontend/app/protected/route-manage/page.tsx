@@ -1,18 +1,17 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Icons } from "@/components/ui/icons"
-
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
+import { useEffect, useState, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 
 const formSchema = z.object({
     route_name: z.string().max(100, "Route Name must be less than 100 characters"),
@@ -20,18 +19,30 @@ const formSchema = z.object({
     end_station_id: z.string().max(50, "End Station must be less than 50 characters"),
 })
 
-interface Station {
+export interface Station {
     id: string
     name: string
 }
 
-interface Route {
+export interface RouteStop {
     route_id: number
     route_name: string
-    start_station_id: string
-    end_station_id: string
     start_station_name: string
     end_station_name: string
+    station_id: number
+    station_name: string
+    station_location: string
+    stop_int: number
+}
+
+export interface Route {
+    route_id: number
+    route_name: string
+    start_station_id: number
+    end_station_id: number
+    start_station_name: string
+    end_station_name: string
+    stops: RouteStop[]
 }
 
 const fetchStations = async () => {
@@ -103,6 +114,7 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
 }
 
 export default function RouteManage() {
+
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [searchQuery, setSearchQuery] = useState("");
@@ -184,7 +196,7 @@ export default function RouteManage() {
 
     const filteredStations = routes.filter((route) =>
         route.route_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        route.start_station_id.toLowerCase().includes(searchQuery.toLowerCase()) || route.end_station_id.toLowerCase().includes(searchQuery.toLowerCase())
+        route.start_station_name.toLowerCase().includes(searchQuery.toLowerCase()) || route.end_station_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -215,7 +227,9 @@ export default function RouteManage() {
 
                     <div className="space-y-4 mt-6">
                         {loading ? (
-                            <p>Loading routes...</p>
+                            <div className="flex justify-center py-8">
+                                <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                            </div>
                         ) : (
                             <Table>
                                 <TableCaption>A list of metro routes and their details</TableCaption>
@@ -229,8 +243,15 @@ export default function RouteManage() {
                                 </TableHeader>
                                 <TableBody>
                                     {filteredStations.map((route) => (
-                                        <TableRow key={route.route_id}>
-                                            <TableCell>{route.route_name}</TableCell>
+                                        <TableRow
+                                            key={route.route_id}
+                                            className="hover:bg-gray-100"
+                                        >
+                                            <TableCell>
+                                                <Link href={`/protected/route-manage/${route.route_id}`} className="block w-full h-full">
+                                                    {route.route_name}
+                                                </Link>
+                                            </TableCell>
                                             <TableCell>{route.start_station_name}</TableCell>
                                             <TableCell>{route.end_station_name}</TableCell>
                                             <TableCell className="text-center">

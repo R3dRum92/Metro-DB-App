@@ -1,7 +1,7 @@
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import List, Optional
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
@@ -101,11 +101,21 @@ class AddRouteRequest(BaseModel):
     end_station_id: str
 
 
+class RouteStopResponse(BaseModel):
+    station_id: uuid.UUID
+    station_name: str
+    station_location: str
+    stop_int: int
+
+
 class RouteResponse(BaseModel):
     route_id: uuid.UUID
     route_name: str
+    start_station_id: Optional[uuid.UUID] = None
     start_station_name: str
+    end_station_id: Optional[uuid.UUID] = None
     end_station_name: str
+    stops: Optional[List[RouteStopResponse]] = None
 
 
 class TrainResponse(BaseModel):
@@ -201,7 +211,6 @@ async def get_stations():
             rows = await conn.fetch(
                 "SELECT * FROM stations ORDER BY status, location, station_name"
             )
-            print(rows)
             stations = [
                 StationResponse(
                     id=row["station_id"],
@@ -225,7 +234,7 @@ async def get_stations():
 
 
 @app.get("/routes", response_model=list[RouteResponse])
-async def get_stations():
+async def get_routes():
     try:
         conn = await get_db_connection()
         try:
@@ -235,10 +244,11 @@ async def get_stations():
                 FROM routes r 
                     JOIN stations s ON r.start_station_id = s.station_id
                     JOIN stations t ON r.end_station_id = t.station_id
+                ORDER BY route_name
                 """
             )
             print(rows)
-            stations = [
+            routes = [
                 RouteResponse(
                     route_id=row["route_id"],
                     route_name=row["route_name"],
@@ -247,7 +257,7 @@ async def get_stations():
                 )
                 for row in rows
             ]
-            return stations
+            return routes
         except Exception as e:
             logger.error(f"Error fetching stations: {str(e)}")
             raise HTTPException(
@@ -258,6 +268,65 @@ async def get_stations():
             await conn.close()
     except Exception as e:
         pass
+
+
+@app.get("/routes/{route_id}", response_model=RouteResponse)
+async def get_route_details(route_id: uuid.UUID):
+    try:
+        conn = await get_db_connection()
+        try:
+            rows = await conn.fetch(
+                """
+                SELECT r.route_id AS route_id, r.station_id AS station_id, s.station_name AS station_name, s.location AS station_location, r.stop_int AS stop_int
+                FROM routes_stations r
+                    JOIN stations s ON r.station_id = s.station_id
+                ORDER BY stop_int
+                """
+            )
+            route = await conn.fetchrow(
+                """
+                SELECT r.route_id AS route_id, r.route_name AS route_name, s.station_id AS start_station_id, s.station_name AS start_station_name, t.station_id AS end_station_id, t.station_name AS end_station_name
+                FROM routes r 
+                    JOIN stations s ON r.start_station_id = s.station_id
+                    JOIN stations t ON r.end_station_id = t.station_id
+                WHERE r.route_id = $1
+                ORDER BY route_name
+                """,
+                route_id,
+            )
+            stops = [
+                RouteStopResponse(
+                    station_id=row["station_id"],
+                    station_name=row["station_name"],
+                    station_location=row["station_location"],
+                    stop_int=row["stop_int"],
+                )
+                for row in rows
+            ]
+            ret = RouteResponse(
+                route_id=route_id,
+                route_name=route["route_name"],
+                start_station_id=route["start_station_id"],
+                start_station_name=route["start_station_name"],
+                end_station_id=route["end_station_id"],
+                end_station_name=route["end_station_name"],
+                stops=stops,
+            )
+            return ret
+        except Exception as e:
+            logger.error(f"Error fetching stops: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch stops. Plase try again later",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        logger.error(f"Error connecting to the database: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error connecting to the database. Please try again later.",
+        )
 
 
 @app.get("/trains", response_model=list[TrainResponse])
@@ -472,12 +541,22 @@ async def add_route(route_data: AddRouteRequest):
             end_station_id,
         )
 
+        await conn.execute(
+            """
+            INSERT INTO route_stations(route_id, station_id, stop_int) VALUES ($1, $2, $3)
+            """,
+            route_id,
+            start_station_id,
+            1,
+        )
+
         return {
             "message": "Add Route Successful",
             "route_id": route_id,
         }
 
     except Exception as e:
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to connect to database. Please try again.",
