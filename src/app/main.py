@@ -280,8 +280,10 @@ async def get_route_details(route_id: uuid.UUID):
                 SELECT r.route_id AS route_id, r.station_id AS station_id, s.station_name AS station_name, s.location AS station_location, r.stop_int AS stop_int
                 FROM routes_stations r
                     JOIN stations s ON r.station_id = s.station_id
-                ORDER BY stop_int
-                """
+                    WHERE r.route_id = $1
+                ORDER BY r.stop_int
+                """,
+                route_id,
             )
             route = await conn.fetchrow(
                 """

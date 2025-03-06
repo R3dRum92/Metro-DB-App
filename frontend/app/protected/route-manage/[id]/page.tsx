@@ -382,6 +382,7 @@ export default function EditRoute() {
                             </div> */}
 
                             {/* Stops Table Section */}
+                            {/*new one*/}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-medium">Route Stops</h3>
