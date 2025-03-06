@@ -133,9 +133,11 @@ export default function UserManagement() {
                                             </Button>
                                         </TableCell>
                                         <TableCell className="text-center flex justify-center gap-2">
-                                            <Button onClick={() => alert(`Edit user: ${user.name}`)} className="mr-2">
-                                                Edit
-                                            </Button>
+                                            <Link href={`/protected/user-manage/${user.id}`}>
+                                                <Button className="mr-2">
+                                                    Edit
+                                                </Button>
+                                            </Link>
                                             <Button onClick={() => alert(`Delete user: ${user.name}`)} className="bg-red-500">
                                                 Delete
                                             </Button>

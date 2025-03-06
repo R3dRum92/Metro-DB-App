@@ -127,6 +127,30 @@ class TrainResponse(BaseModel):
     route_name: str
 
 
+## user edit parts
+class UserDetailResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    email: Optional[EmailStr] = None
+    phone: str
+    wallet: float
+
+
+class UpdateUserRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=50)
+    email: Optional[EmailStr] = None
+    phone: str = Field(..., pattern="^[0-9]{11}$")
+    wallet: float = Field(..., ge=0)
+
+
+## history details
+class UserHistoryEntry(BaseModel):
+    id: uuid.UUID
+    action: str
+    date: datetime
+    details: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up... Connecting to the database.")
@@ -563,3 +587,234 @@ async def add_route(route_data: AddRouteRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to connect to database. Please try again.",
         ) from e
+
+
+## user endpoints gula
+@app.get("/users/{user_id}", response_model=UserDetailResponse)
+async def get_user(user_id: uuid.UUID):
+    try:
+        conn = await get_db_connection()
+        try:
+            user = await conn.fetchrow(
+                """
+                SELECT u.id, u.name, u.email, u.phone_number, w.balance
+                FROM users u
+                JOIN wallets w ON u.id = w.user_id
+                WHERE u.id = $1
+                """,
+                user_id,
+            )
+
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                )
+
+            return UserDetailResponse(
+                id=user["id"],
+                name=user["name"],
+                email=user["email"],
+                phone=user["phone_number"],
+                wallet=user["balance"],
+            )
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(f"Error fetching user: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch user details. Please try again later.",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        logger.error(f"Error connecting to database: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error connecting to the database. Please try again later.",
+        )
+
+
+@app.put("/users/{user_id}", response_model=UserDetailResponse)
+async def update_user(user_id: uuid.UUID, user_data: UpdateUserRequest):
+    try:
+        conn = await get_db_connection()
+        try:
+            # Check if user exists
+            existing_user = await conn.fetchrow(
+                "SELECT id FROM users WHERE id = $1", user_id
+            )
+
+            if not existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                )
+
+            # Check for email and phone uniqueness (excluding current user)
+            if user_data.email:
+                email_check = await conn.fetchrow(
+                    "SELECT id FROM users WHERE email = $1 AND id != $2",
+                    user_data.email,
+                    user_id,
+                )
+                if email_check:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={
+                            "errors": {
+                                "email": ["Email is already in use by another user"]
+                            }
+                        },
+                    )
+
+            phone_check = await conn.fetchrow(
+                "SELECT id FROM users WHERE phone_number = $1 AND id != $2",
+                user_data.phone,
+                user_id,
+            )
+            if phone_check:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={
+                        "errors": {
+                            "phone": ["Phone number is already in use by another user"]
+                        }
+                    },
+                )
+
+            # Update user details in transaction
+            async with conn.transaction():
+                # Update user table
+                await conn.execute(
+                    """
+                    UPDATE users 
+                    SET name = $1, email = $2, phone_number = $3
+                    WHERE id = $4
+                    """,
+                    user_data.name,
+                    user_data.email,
+                    user_data.phone,
+                    user_id,
+                )
+
+                # Update wallet
+                await conn.execute(
+                    """
+                    UPDATE wallets
+                    SET balance = $1
+                    WHERE user_id = $2
+                    """,
+                    user_data.wallet,
+                    user_id,
+                )
+
+                # Add entry to user history
+                history_id = uuid.uuid4()
+                now = datetime.now()
+                await conn.execute(
+                    """
+                    INSERT INTO user_history (id, user_id, action, date, details)
+                    VALUES ($1, $2, $3, $4, $5)
+                    """,
+                    history_id,
+                    user_id,
+                    "User Updated",
+                    now,
+                    f"User details updated: Name={user_data.name}, Email={user_data.email}, Phone={user_data.phone}, Wallet={user_data.wallet}",
+                )
+
+            # Get updated user details
+            updated_user = await conn.fetchrow(
+                """
+                SELECT u.id, u.name, u.email, u.phone_number, w.balance
+                FROM users u
+                JOIN wallets w ON u.id = w.user_id
+                WHERE u.id = $1
+                """,
+                user_id,
+            )
+
+            return UserDetailResponse(
+                id=updated_user["id"],
+                name=updated_user["name"],
+                email=updated_user["email"],
+                phone=updated_user["phone_number"],
+                wallet=updated_user["balance"],
+            )
+
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(f"Error updating user: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update user. Please try again later.",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        logger.error(f"Error connecting to database: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error connecting to the database. Please try again later.",
+        )
+
+
+## history endpoint
+
+
+@app.get("/users/{user_id}/history", response_model=List[UserHistoryEntry])
+async def get_user_history(user_id: uuid.UUID):
+    try:
+        conn = await get_db_connection()
+        try:
+            # Check if user exists
+            user_exists = await conn.fetchrow(
+                "SELECT id FROM users WHERE id = $1", user_id
+            )
+
+            if not user_exists:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                )
+
+            # Get user history entries
+            rows = await conn.fetch(
+                """
+                SELECT id, action, date, details 
+                FROM user_history
+                WHERE user_id = $1
+                ORDER BY date DESC
+                LIMIT 50
+                """,
+                user_id,
+            )
+
+            history = [
+                UserHistoryEntry(
+                    id=row["id"],
+                    action=row["action"],
+                    date=row["date"],
+                    details=row["details"],
+                )
+                for row in rows
+            ]
+
+            return history
+
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(f"Error fetching user history: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch user history. Please try again later.",
+            )
+        finally:
+            await conn.close()
+    except Exception as e:
+        logger.error(f"Error connecting to database: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error connecting to the database. Please try again later.",
+        )
