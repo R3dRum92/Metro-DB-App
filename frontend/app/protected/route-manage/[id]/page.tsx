@@ -33,7 +33,7 @@ export type addStopActionResult = {
     errors?: Record<string, string[]>
 }
 
-export async function addStop(formData: FormData, routeId: string): Promise<addStopActionResult> {
+export async function addStop(formData: FormData, route_id: string): Promise<addStopActionResult> {
     const validatedFields = stopFormSchema.safeParse({
         stop_int: formData.get("stop_int"),
         station_id: formData.get("station_id")
@@ -52,7 +52,7 @@ export async function addStop(formData: FormData, routeId: string): Promise<addS
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                routeId,
+                route_id,
                 stop_int,
                 station_id,
             })
@@ -89,7 +89,7 @@ export async function addStop(formData: FormData, routeId: string): Promise<addS
 
 export default function EditRoute() {
     const params = useParams()
-    const routeId = String(params.id)
+    const route_id = String(params.id)
 
     const [route, setRoute] = useState<Route | null>(null)
     const [stations, setStations] = useState<Station[]>([])
@@ -123,7 +123,7 @@ export default function EditRoute() {
 
             console.log(values)
 
-            const result = await addStop(formData, routeId)
+            const result = await addStop(formData, route_id)
             console.log(result)
             if (result?.errors) {
 
@@ -158,10 +158,10 @@ export default function EditRoute() {
     // Fetch route details
     useEffect(() => {
         const fetchRouteDetails = async () => {
-            if (!routeId) return
+            if (!route_id) return
 
             try {
-                const response = await fetch(`http://localhost:8000/routes/${routeId}`)
+                const response = await fetch(`http://localhost:8000/routes/${route_id}`)
 
                 if (!response.ok) {
                     throw new Error(`Error fetching route: ${response.statusText}`)
@@ -205,13 +205,13 @@ export default function EditRoute() {
         }
 
         fetchRouteDetails()
-    }, [routeId, form])
+    }, [route_id, form])
 
     // Handle form submission
     function onSubmit(values: z.infer<typeof formSchema>) {
         startTransition(async () => {
             try {
-                const response = await fetch(`http://localhost:8000/update_route/${routeId}`, {
+                const response = await fetch(`http://localhost:8000/update_route/${route_id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -290,96 +290,6 @@ export default function EditRoute() {
                                 </div>
                             </div>
 
-                            {/* Stops Table Section*/}
-                            {/* <div className="mb-8">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-medium">Route Stops</h3>
-                                    <Button size="sm" variant="outline" onClick={toggleStopModal}>
-                                        Add Stop
-                                    </Button>
-                                    {stopModal && (
-                                        <div style={modalStyles}>
-                                            <div style={modalContentStyles}>
-                                                <h2 className="text-primary font-bold text-2xl">Add Stop</h2>
-                                                <Form {...form}>
-                                                    <form onSubmit={stopForm.handleSubmit(onAddStop)}>
-                                                        <FormField control={stopForm.control} name="stop_int" render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>Stop No.</FormLabel>
-                                                                <FormControl>
-                                                                    <Input type="text" {...field} />
-                                                                </FormControl>
-                                                            </FormItem>
-                                                        )} />
-
-                                                        <FormField control={stopForm.control} name="station_id" render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>Station</FormLabel>
-                                                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                                    <SelectTrigger className="w-[280px]">
-                                                                        <SelectValue placeholder="Select a station" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        {isLoading ? (
-                                                                            <div>Loading...</div>
-                                                                        ) : (
-                                                                            stations.map((station: Station) => (
-                                                                                <SelectItem value={station.id}>
-                                                                                    {station.name}
-                                                                                </SelectItem>
-                                                                            ))
-                                                                        )}
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </FormItem>
-                                                        )} />
-                                                    </form>
-                                                </Form>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {route.stops && route.stops.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableCaption>A list of metro routes and their details</TableCaption>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Stop No.</TableHead>
-                                                    <TableHead>Station</TableHead>
-                                                    <TableHead>Location</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {route.stops.map((route) => (
-                                                    <TableRow
-                                                        key={route.route_id}
-                                                        className="hover:bg-gray-100"
-                                                    >
-                                                        <TableCell>
-                                                            <Link href={`/protected/route-manage/${route.route_id}`} className="block w-full h-full">
-                                                                {route.stop_int}
-                                                            </Link>
-                                                        </TableCell>
-                                                        <TableCell>{route.station_name}</TableCell>
-                                                        <TableCell>{route.station_location}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">No stops have been added to this route</p>
-                                        <Link href={`/protected/route-stops/${routeId}`}>
-                                            <Button variant="outline" size="sm" className="mt-2">
-                                                Add Stops
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                )}
-                            </div> */}
 
                             {/* Stops Table Section */}
                             {/*new one*/}
@@ -481,6 +391,7 @@ export default function EditRoute() {
                                                     <TableHead>Stop No.</TableHead>
                                                     <TableHead>Station</TableHead>
                                                     <TableHead>Location</TableHead>
+                                                    <TableHead className="text-center">Ticket Price</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -490,12 +401,13 @@ export default function EditRoute() {
                                                         className="hover:bg-gray-100"
                                                     >
                                                         <TableCell>
-                                                            <Link href={`/protected/route-manage/${routeId}`} className="block w-full h-full">
+                                                            <Link href={`/protected/route-manage/${route_id}`} className="block w-full h-full">
                                                                 {stop.stop_int}
                                                             </Link>
                                                         </TableCell>
                                                         <TableCell>{stop.station_name}</TableCell>
                                                         <TableCell>{stop.station_location || stop.station_location}</TableCell>
+                                                        <TableCell className="text-center">{stop.ticket_price || "-"}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>

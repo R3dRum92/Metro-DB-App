@@ -33,6 +33,7 @@ export interface RouteStop {
     station_name: string
     station_location: string
     stop_int: number
+    ticket_price: number | null
 }
 
 export interface Route {
@@ -94,7 +95,7 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
                 errors: error.detail.errors || { form: ["Server error occurred"] }
             }
         } else {
-            window.location.reload()
+
         }
 
         const data = await response.json()
@@ -161,12 +162,9 @@ export default function RouteManage() {
 
             const result = await addRoute(formData)
             console.log(result)
-            if (result?.errors) {
-
-            } else {
-                form.reset()
-                toggleModal()
-            }
+            form.reset()
+            toggleModal()
+            window.location.reload()
         })
     }
 

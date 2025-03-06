@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS route_stations ( 
+CREATE TABLE IF NOT EXISTS routes_stations ( 
     route_station_id uuid PRIMARY KEY, 
     route_id uuid NOT NULL, 
     station_id uuid NOT NULL, 

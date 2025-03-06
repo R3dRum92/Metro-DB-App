@@ -106,6 +106,7 @@ class RouteStopResponse(BaseModel):
     station_name: str
     station_location: str
     stop_int: int
+    ticket_price: Optional[int] = None
 
 
 class RouteResponse(BaseModel):
@@ -149,6 +150,12 @@ class UserHistoryEntry(BaseModel):
     action: str
     date: datetime
     details: str
+
+
+class RouteStopRequest(BaseModel):
+    route_id: str
+    station_id: str
+    stop_int: str
 
 
 @asynccontextmanager
@@ -301,7 +308,7 @@ async def get_route_details(route_id: uuid.UUID):
         try:
             rows = await conn.fetch(
                 """
-                SELECT r.route_id AS route_id, r.station_id AS station_id, s.station_name AS station_name, s.location AS station_location, r.stop_int AS stop_int
+                SELECT r.route_id AS route_id, r.station_id AS station_id, s.station_name AS station_name, s.location AS station_location, r.stop_int AS stop_int, r.ticket_price AS ticket_price
                 FROM routes_stations r
                     JOIN stations s ON r.station_id = s.station_id
                     WHERE r.route_id = $1
@@ -326,6 +333,7 @@ async def get_route_details(route_id: uuid.UUID):
                     station_name=row["station_name"],
                     station_location=row["station_location"],
                     stop_int=row["stop_int"],
+                    ticket_price=row["ticket_price"],
                 )
                 for row in rows
             ]
@@ -549,6 +557,36 @@ async def add_station(form_data: AddStationRequest):
         ) from e
 
 
+@app.post("/add_stop")
+async def add_stop(stop_data: RouteStopRequest):
+    try:
+        conn = await get_db_connection()
+        route_id = uuid.UUID(stop_data.route_id)
+        station_id = uuid.UUID(stop_data.station_id)
+        stop_int = int(stop_data.stop_int)
+        try:
+            await conn.execute(
+                """
+                INSERT INTO routes_stations(route_id, station_id, stop_int) VALUES ($1, $2, $3)
+                """,
+                route_id,
+                station_id,
+                stop_int,
+            )
+        except Exception as e:
+            logger.error(f"Failed to add stop: {e}")
+
+        return {
+            "message": "Successfully added stop",
+            "station_id": stop_data.station_id,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to connect to the database. Please try again.",
+        ) from e
+
+
 @app.post("/add_route")
 async def add_route(route_data: AddRouteRequest):
     try:
@@ -569,7 +607,7 @@ async def add_route(route_data: AddRouteRequest):
 
         await conn.execute(
             """
-            INSERT INTO route_stations(route_id, station_id, stop_int) VALUES ($1, $2, $3)
+            INSERT INTO routes_stations(route_id, station_id, stop_int) VALUES ($1, $2, $3)
             """,
             route_id,
             start_station_id,
