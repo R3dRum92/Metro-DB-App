@@ -290,8 +290,8 @@ export default function EditRoute() {
                                 </div>
                             </div>
 
-                            {/* Stops Table Section
-                            <div className="mb-8">
+                            {/* Stops Table Section*/}
+                            {/* <div className="mb-8">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-medium">Route Stops</h3>
                                     <Button size="sm" variant="outline" onClick={toggleStopModal}>
@@ -390,13 +390,12 @@ export default function EditRoute() {
                                     </Button>
                                 </div>
 
-                                {/* Modal for adding a stop */}
                                 {stopModal && (
                                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                                         <div className="bg-white rounded-md p-6 w-[400px] max-w-md">
                                             <h2 className="text-primary font-bold text-2xl mb-4">Add Stop</h2>
 
-                                            <Form {...stopForm}>
+                                            <Form {...form}>
                                                 <form onSubmit={stopForm.handleSubmit(onAddStop)} className="space-y-4">
                                                     <FormField
                                                         control={stopForm.control}

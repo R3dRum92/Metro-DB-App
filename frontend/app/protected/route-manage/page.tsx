@@ -255,7 +255,7 @@ export default function RouteManage() {
                                             <TableCell>{route.start_station_name}</TableCell>
                                             <TableCell>{route.end_station_name}</TableCell>
                                             <TableCell className="text-center">
-                                                <Link href={`/protected/edit-route/${route.route_id}`} className="text-blue-500 hover:underline">
+                                                <Link href={`/protected/route-manage/${route.route_id}`} className="text-blue-500 hover:underline">
                                                     Edit
                                                 </Link>
                                             </TableCell>
