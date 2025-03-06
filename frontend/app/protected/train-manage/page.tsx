@@ -11,25 +11,26 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import React from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const formSchema = z.object({
     train_code: z.string().max(10, "Train Code must be less than 10 characters"),
-    route_id: z.string().max(10, "Route ID must be a valid number"),
+    route_id: z.string().max(50, "Route ID must be a valid number"),
     capacity: z.string().max(5, "Capacity must be a valid number"),
     operational_status: z.string().max(20, "Operational status must be less than 20 characters"),
 })
 
 interface Train {
-    train_id: number
+    train_id: string
     train_code: string
-    route_id: number
-    capacity: number
+    route_id: string
+    capacity: string
     operational_status: string
     route_name?: string
 }
 
 interface Route {
-    route_id: number
+    route_id: string
     route_name: string
     start_station_name: string
     end_station_name: string
@@ -62,6 +63,8 @@ export async function addTrain(formData: FormData):
 
     const { train_code, route_id, capacity, operational_status } = validatedFields.data
 
+    console.log(validatedFields.data)
+
     try {
         const response = await fetch("http://localhost:8000/add_train", {
             method: 'POST',
@@ -75,6 +78,7 @@ export async function addTrain(formData: FormData):
                 operational_status,
             })
         })
+        console.log(response.json())
 
         if (!response.ok) {
             const error = await response.json()
@@ -111,6 +115,7 @@ export default function TrainManage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -126,9 +131,12 @@ export default function TrainManage() {
         async function loadRoutes() {
             try {
                 const routeData = await fetchRoutes()
+                console.log(routeData)
                 setRoutes(routeData)
             } catch (error) {
                 console.error("Error fetching routes:", error)
+            } finally {
+                setIsLoading(false)
             }
         }
         loadRoutes()
@@ -152,20 +160,27 @@ export default function TrainManage() {
         fetchTrains()
     }, [])
 
-    const getRouteNameById = (routeId: number) => {
-        const route = routes.find(r => r.route_id === routeId)
-        return route ? route.route_name : `Unknown Route (${routeId})`
-    }
+    // const getRouteNameById = (routeId: number) => {
+    //     const route = routes.find(r => r.route_id === routeId)
+    //     return route ? route.route_name : `Unknown Route (${routeId})`
+    // }
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen)
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        startTransition(() => {
+        startTransition(async () => {
+            const formData = new FormData()
+            Object.entries(values).forEach(([Key, value]) => formData.append(Key, value))
+
             console.log(values)
+
+            const result = await addTrain(formData)
+            console.log(result)
             form.reset()
             toggleModal()
+            // window.location.reload()
         })
     }
 
@@ -215,7 +230,7 @@ export default function TrainManage() {
                                     {filteredTrains.map((train) => (
                                         <TableRow key={train.train_id}>
                                             <TableCell>{train.train_code}</TableCell>
-                                            <TableCell>{getRouteNameById(train.route_id)}</TableCell>
+                                            <TableCell>{train.route_id}</TableCell>
                                             <TableCell>{train.capacity}</TableCell>
                                             <TableCell>{train.operational_status}</TableCell>
                                             <TableCell className="text-center">
@@ -242,8 +257,23 @@ export default function TrainManage() {
                                                 )} />
                                                 <FormField control={form.control} name="route_id" render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Route ID</FormLabel>
-                                                        <FormControl><Input type="text" {...field} /></FormControl>
+                                                        <FormLabel>Route Name</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                                            <SelectTrigger className="w-[280px]">
+                                                                <SelectValue placeholder="Select a station" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {isLoading ? (
+                                                                    <div>Loading...</div>
+                                                                ) : (
+                                                                    routes.map((route: Route) => (
+                                                                        <SelectItem key={route.route_id} value={route.route_id}>
+                                                                            {route.route_name}
+                                                                        </SelectItem>
+                                                                    ))
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
                                                     </FormItem>
                                                 )} />
                                                 <FormField control={form.control} name="capacity" render={({ field }) => (
@@ -252,12 +282,28 @@ export default function TrainManage() {
                                                         <FormControl><Input type="text" {...field} /></FormControl>
                                                     </FormItem>
                                                 )} />
-                                                <FormField control={form.control} name="operational_status" render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Operational Status</FormLabel>
-                                                        <FormControl><Input type="text" {...field} /></FormControl>
-                                                    </FormItem>
-                                                )} />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="operational_status"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Route Name</FormLabel>
+                                                            <Select
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                            >
+                                                                <SelectTrigger className="w-[280px]">
+                                                                    <SelectValue placeholder="Operational Status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="active">Active</SelectItem>
+                                                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                                                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </FormItem>
+                                                    )}
+                                                />
                                                 <Button type="submit" className="w-full">Add Train</Button>
                                             </form>
                                         </Form>
