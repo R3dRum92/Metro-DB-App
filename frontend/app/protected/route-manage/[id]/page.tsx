@@ -36,7 +36,7 @@ export type addStopActionResult = {
 export async function addStop(formData: FormData, routeId: string): Promise<addStopActionResult> {
     const validatedFields = stopFormSchema.safeParse({
         stop_int: formData.get("stop_int"),
-        station_id: formData.get("start_station_id")
+        station_id: formData.get("station_id")
     })
 
     if (!validatedFields.success) {
@@ -290,7 +290,7 @@ export default function EditRoute() {
                                 </div>
                             </div>
 
-                            {/* Stops Table Section */}
+                            {/* Stops Table Section
                             <div className="mb-8">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-medium">Route Stops</h3>
@@ -377,6 +377,136 @@ export default function EditRoute() {
                                                 Add Stops
                                             </Button>
                                         </Link>
+                                    </div>
+                                )}
+                            </div> */}
+
+                            {/* Stops Table Section */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-medium">Route Stops</h3>
+                                    <Button size="sm" variant="outline" onClick={toggleStopModal}>
+                                        Add Stop
+                                    </Button>
+                                </div>
+
+                                {/* Modal for adding a stop */}
+                                {stopModal && (
+                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                        <div className="bg-white rounded-md p-6 w-[400px] max-w-md">
+                                            <h2 className="text-primary font-bold text-2xl mb-4">Add Stop</h2>
+
+                                            <Form {...stopForm}>
+                                                <form onSubmit={stopForm.handleSubmit(onAddStop)} className="space-y-4">
+                                                    <FormField
+                                                        control={stopForm.control}
+                                                        name="stop_int"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Stop No.</FormLabel>
+                                                                <FormControl>
+                                                                    <Input type="text" placeholder="Enter stop number" {...field} />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <FormField
+                                                        control={stopForm.control}
+                                                        name="station_id"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Station</FormLabel>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                    value={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-full">
+                                                                        <SelectValue placeholder="Select a station" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {isLoading ? (
+                                                                            <div className="p-2">Loading...</div>
+                                                                        ) : (
+                                                                            stations.map((station) => (
+                                                                                <SelectItem key={station.id} value={station.id}>
+                                                                                    {station.name}
+                                                                                </SelectItem>
+                                                                            ))
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <div className="flex justify-between pt-4">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            onClick={toggleStopModal}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            type="submit"
+                                                            className="bg-primary text-white"
+                                                            disabled={isPending}
+                                                        >
+                                                            {isPending ? (
+                                                                <>
+                                                                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                                    Adding...
+                                                                </>
+                                                            ) : (
+                                                                "Add Stop"
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </form>
+                                            </Form>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {route.stops && route.stops.length > 0 ? (
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableCaption>A list of metro routes and their details</TableCaption>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Stop No.</TableHead>
+                                                    <TableHead>Station</TableHead>
+                                                    <TableHead>Location</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {route.stops.map((stop) => (
+                                                    <TableRow
+                                                        key={stop.route_id || `${stop.station_id}-${stop.stop_int}`}
+                                                        className="hover:bg-gray-100"
+                                                    >
+                                                        <TableCell>
+                                                            <Link href={`/protected/route-manage/${routeId}`} className="block w-full h-full">
+                                                                {stop.stop_int}
+                                                            </Link>
+                                                        </TableCell>
+                                                        <TableCell>{stop.station_name}</TableCell>
+                                                        <TableCell>{stop.station_location || stop.station_location}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4 bg-gray-50 rounded-lg">
+                                        <p className="text-gray-500">No stops have been added to this route</p>
+                                        <Button variant="outline" size="sm" className="mt-2" onClick={toggleStopModal}>
+                                            Add Stops
+                                        </Button>
                                     </div>
                                 )}
                             </div>
