@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead, TableCaption } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Icons } from "@/components/ui/icons"
 import Link from "next/link"
 
 // Modal Components
@@ -106,7 +107,9 @@ export default function UserManagement() {
             <Card className="w-full max-w-4xl">
                 <CardContent>
                     {loading ? (
-                        <p>Loading users...</p>
+                        <div className="flex justify-center py-8">
+                            <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                        </div>
                     ) : (
                         <Table>
                             <TableCaption>A list of users and their details</TableCaption>

@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Icons } from "@/components/ui/icons"
 import React from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -211,9 +212,11 @@ export default function TrainManage() {
                             />
                         </div>
                     </div>
-                    <div className="space-y-4 mt-6">
+                    <div className="space-y-4 mt-6 text-center">
                         {loading ? (
-                            <p>Loading trains...</p>
+                            <div className="flex justify-center py-8">
+                                <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                            </div>
                         ) : (
                             <Table>
                                 <TableCaption>A list of metro trains and their details</TableCaption>
@@ -244,8 +247,10 @@ export default function TrainManage() {
                         <div className="mt-6 text-center">
                             <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Train</Button>
                             {isModalOpen && (
-                                <div style={modalStyles}>
-                                    <div style={modalContentStyles}>
+                                <div style={modalStyles} onClick={(e) => {
+                                    if (e.target === e.currentTarget) toggleModal();
+                                }}>
+                                    <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
                                         <h2 className="text-primary font-bold text-2xl">Train Form</h2>
                                         <Form {...form}>
                                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

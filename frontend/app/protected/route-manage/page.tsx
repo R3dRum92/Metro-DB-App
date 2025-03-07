@@ -265,8 +265,10 @@ export default function RouteManage() {
                         <div className="mt-6 text-center">
                             <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Route</Button>
                             {isModalOpen && (
-                                <div style={modalStyles}>
-                                    <div style={modalContentStyles}>
+                                <div style={modalStyles} onClick={(e) => {
+                                    if (e.target === e.currentTarget) toggleModal();
+                                }}>
+                                    <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
                                         <h2 className="text-primary font-bold text-2xl">Route Form</h2>
                                         <Form {...form}>
                                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -332,7 +334,11 @@ export default function RouteManage() {
                                                 </Button>
                                             </form>
                                         </Form>
-                                        <button onClick={toggleModal} style={closeButtonStyles}>Close</button>
+                                        <div className="flex justify-center mt-3">
+                                            <button onClick={toggleModal} style={closeButtonStyles}>
+                                                Close
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}

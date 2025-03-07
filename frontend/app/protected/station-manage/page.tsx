@@ -242,14 +242,16 @@ export default function StationManage() {
                         </div>
                     </div>
 
-                    <div className="space-y-4 mt-6">
+                    <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md">
                         {/* Station table */}
                         {loading ? (
-                            <p>Loading stations...</p>
+                            <div className="flex justify-center py-8">
+                                <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                            </div>
                         ) : (
                             <Table>
-                                <TableCaption>A list of metro stations and their details</TableCaption>
-                                <TableHeader>
+                                <TableCaption className="mb-6">A list of metro stations and their details</TableCaption>
+                                <TableHeader className="sticky top-0 bg-white" style={{ zIndex: 1 }}>
                                     <TableRow>
                                         <TableHead>Station Name</TableHead>
                                         <TableHead>Location</TableHead>
@@ -277,66 +279,71 @@ export default function StationManage() {
                                 </TableBody>
                             </Table>
                         )}
-                        {/* Add Station button */}
-                        <div className="mt-6 text-center">
-                            <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Station</Button>
+                    </div>
 
-                            {/* Modal with form */}
-                            {isModalOpen && (
-                                <div style={modalStyles}>
-                                    <div style={modalContentStyles}>
-                                        <h2 className="text-primary font-bold text-2xl">Station Form</h2>
-                                        <Form {...form}>
-                                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                                                {/* name Field */}
-                                                <FormField
-                                                    control={form.control}
-                                                    name="name"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Station Name </FormLabel>
-                                                            <FormControl>
-                                                                <Input type="text" {...field} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                {/* location Field */}
-                                                <FormField
-                                                    control={form.control}
-                                                    name="location"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Location</FormLabel>
-                                                            <FormControl>
-                                                                <Input type="text"  {...field} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
+                    {/* Add Station button */}
+                    <div className="mt-6 text-center">
+                        <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Station</Button>
 
-                                                {/* Submit Button */}
-                                                <Button type="submit" className="w-full" disabled={isPending}>
-                                                    {isPending ? (
-                                                        <>
-                                                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                                                            Adding...
-                                                        </>
-                                                    ) : (
+                        {/* Modal with form */}
+                        {isModalOpen && (
+                            <div style={modalStyles} onClick={(e) => {
+                                if (e.target === e.currentTarget) toggleModal();
+                            }}>
+                                <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
+                                    <h2 className="text-primary font-bold text-2xl">Station Form</h2>
+                                    <Form {...form}>
+                                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                            {/* name Field */}
+                                            <FormField
+                                                control={form.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Station Name </FormLabel>
+                                                        <FormControl>
+                                                            <Input type="text" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            {/* location Field */}
+                                            <FormField
+                                                control={form.control}
+                                                name="location"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Location</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="text"  {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
 
-                                                        "Add Station"
+                                            {/* Submit Button */}
+                                            <Button type="submit" className="w-full" disabled={isPending}>
+                                                {isPending ? (
+                                                    <>
+                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        Adding...
+                                                    </>
+                                                ) : (
 
-                                                    )}
-                                                </Button>
-                                            </form>
-                                        </Form>
+                                                    "Add Station"
+
+                                                )}
+                                            </Button>
+                                        </form>
+                                    </Form>
+                                    <div className="flex justify-center mt-3">
                                         <button onClick={toggleModal} style={closeButtonStyles}>
                                             Close
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -354,6 +361,7 @@ const modalStyles: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1000,
 };
 
 const modalContentStyles: React.CSSProperties = {

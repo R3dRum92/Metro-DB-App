@@ -93,31 +93,30 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent className="p-6">
                             <div className="grid grid-cols-2 gap-6 mb-6">
-                                {/* Displaying first 5 rows of the Route table */}
+                                {/* Displaying first 5 rows of the Station table */}
                                 <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Routes</h3>
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Stations</h3>
                                     <Table>
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
-                                                <TableHead>Route Name</TableHead>
-                                                <TableHead>Start Station</TableHead>
-                                                <TableHead>End Station</TableHead>
+                                                <TableHead className="text-center">Station Name</TableHead>
+                                                <TableHead className="text-center">Location</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {routes.slice(0, 5).map((route, index) => (
+                                            {stations.slice(0, 5).map((station, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>{route.route_name}</TableCell>
-                                                    <TableCell>{route.start_station_name}</TableCell>
-                                                    <TableCell>{route.end_station_name}</TableCell>
+                                                    <TableCell className="text-center">{station.name}</TableCell>
+                                                    <TableCell className="text-center">{station.location}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/route-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors text-center">Manage Routes</Link>
+                                        <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
                                     </div>
                                 </div>
+
 
                                 {/* Displaying first 5 rows of the Train table */}
                                 <div className="p-4 bg-card rounded-lg border border-primary/20">
@@ -125,25 +124,25 @@ export default function Dashboard() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
-                                                <TableHead>Train Code</TableHead>
-                                                <TableHead>Route Name</TableHead>
-                                                <TableHead>Status</TableHead>
+                                                <TableHead className="text-center">Train Code</TableHead>
+                                                <TableHead className="text-center">Route Name</TableHead>
+                                                <TableHead className="text-center">Status</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {trains.slice(0, 5).map((train, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>{train.train_code}</TableCell>
-                                                    <TableCell>{train.route_name}</TableCell>
-                                                    <TableCell>{train.operational_status}</TableCell>
-                                                    {/* <TableCell>
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${train.operational_status === 'active'
+                                                    <TableCell className="text-center">{train.train_code}</TableCell>
+                                                    <TableCell className="text-center">{train.route_name}</TableCell>
+                                                    {/* <TableCell>{train.operational_status}</TableCell> */}
+                                                    <TableCell className="text-center">
+                                                        <span className={`px-2 py-1 rounded-full text-s font-medium ${train.operational_status === 'active'
                                                             ? 'bg-green-100 text-green-800'
                                                             : 'bg-red-100 text-red-800'
                                                             }`}>
                                                             {train.operational_status}
                                                         </span>
-                                                    </TableCell> */}
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -153,27 +152,29 @@ export default function Dashboard() {
                                     </div>
                                 </div>
 
-                                {/* Displaying first 5 rows of the Station table */}
+                                {/* Displaying first 5 rows of the Route table */}
                                 <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Stations</h3>
+                                    <h3 className="text-lg font-semibold text-center text-primary mb-2">Routes</h3>
                                     <Table>
                                         <TableHeader>
                                             <TableRow className="bg-primary/5">
-                                                <TableHead>Station Name</TableHead>
-                                                <TableHead>Location</TableHead>
+                                                <TableHead className="text-center">Route Name</TableHead>
+                                                <TableHead className="text-center">Start Station</TableHead>
+                                                <TableHead className="text-center">End Station</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {stations.slice(0, 5).map((station, index) => (
+                                            {routes.slice(0, 5).map((route, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>{station.name}</TableCell>
-                                                    <TableCell>{station.location}</TableCell>
+                                                    <TableCell className="text-center">{route.route_name}</TableCell>
+                                                    <TableCell className="text-center">{route.start_station_name}</TableCell>
+                                                    <TableCell className="text-center">{route.end_station_name}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-center mt-4">
-                                        <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
+                                        <Link href="/protected/route-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors text-center">Manage Routes</Link>
                                     </div>
                                 </div>
                             </div>
