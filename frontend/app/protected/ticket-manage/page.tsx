@@ -537,7 +537,7 @@ export default function TicketManage() {
                         </div>
                         <p className="text-sm text-gray-600">
                             For more information on ticketing options and fare policies, please visit the official
-                            <a href="#" className="text-blue-600 hover:underline"> Dhaka Metro Rail website</a>.
+                            <a href="/protected/dashboard" className="text-blue-600 hover:underline"> Dhaka Metro Rail website</a>.
                         </p>
                     </div>
                 </CardContent>
