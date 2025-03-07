@@ -1,19 +1,19 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
-import { useParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Icons } from "@/components/ui/icons"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Route, Station, RouteStop } from "../page"
-import { Icons } from "@/components/ui/icons"
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import Link from "next/link"
+import { useParams } from "next/navigation"
+import { useEffect, useState, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { Route, Station } from "../page"
 
 // Form schema for validation
 const formSchema = z.object({
@@ -190,19 +190,6 @@ export default function EditRoute() {
 
 
         // Fetch route stops
-        const fetchRouteStops = async (id: string | number) => {
-            try {
-                const response = await fetch(`http://localhost:8000/route_stops/${id}`)
-                if (!response.ok) {
-                    console.error("Error fetching route stops:", response.statusText)
-                    return []
-                }
-                return await response.json()
-            } catch (error) {
-                console.error("Error fetching route stops:", error)
-                return []
-            }
-        }
 
         fetchRouteDetails()
     }, [route_id, form])
@@ -224,7 +211,6 @@ export default function EditRoute() {
                     throw new Error(errorData.detail || "Failed to update route")
                 }
 
-                const data = await response.json()
                 setMessage({ type: "success", content: "Route updated successfully" })
 
                 // Update local state
@@ -521,31 +507,5 @@ export default function EditRoute() {
     )
 }
 
-const modalStyles: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-}
 
-const modalContentStyles: React.CSSProperties = {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '5px',
-    width: '300px',
-}
 
-const closeButtonStyles: React.CSSProperties = {
-    marginTop: '10px',
-    backgroundColor: 'red',
-    color: 'white',
-    fontSize: '12px',
-    border: 'none',
-    padding: '6px',
-    borderRadius: '5px',
-}
