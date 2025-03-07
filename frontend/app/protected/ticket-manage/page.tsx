@@ -265,6 +265,13 @@ export default function TicketManage() {
 
                             {/* Station Selection */}
                             <div className="space-y-4">
+                                {!fare && !calculating && !errorMessage && (
+                                    <div className="pt-2">
+                                        <p className="text-green-700 font-bold">
+                                            Select stations and click 'Calculate Fare' to see the ticket price.
+                                        </p>
+                                    </div>
+                                )}
                                 <div className="space-y-2">
                                     <label className="font-medium text-gray-700">Origin</label>
                                     <Select value={originStation} onValueChange={setOriginStation}>
@@ -328,13 +335,7 @@ export default function TicketManage() {
                                     </div>
                                 )}
 
-                                {!fare && !calculating && !errorMessage && (
-                                    <div className="pt-2">
-                                        <p className="text-gray-700 font-medium">
-                                            Select stations and click 'Calculate Fare' to see the ticket price.
-                                        </p>
-                                    </div>
-                                )}
+
 
                                 {errorMessage && (
                                     <div className="p-4 bg-red-50 text-red-700 rounded-lg">
@@ -343,7 +344,7 @@ export default function TicketManage() {
                                     </div>
                                 )}
 
-                                <div className="pt-2 italic text-sm text-gray-500">
+                                <div className="pt-2 text-sm text-gray-500">
                                     <p>There is <span className="font-bold">no</span> half fare for students.</p>
                                 </div>
                             </div>

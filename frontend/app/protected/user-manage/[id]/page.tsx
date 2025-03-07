@@ -304,9 +304,6 @@ export default function EditUser() {
                                                     "Update User"
                                                 )}
                                             </Button>
-                                            <Link href="/protected/user-manage">
-                                                <Button variant="outline" type="button">Cancel</Button>
-                                            </Link>
                                         </div>
                                     </form>
                                 </Form>

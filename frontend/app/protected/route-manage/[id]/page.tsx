@@ -354,13 +354,7 @@ export default function EditRoute() {
                                                     />
 
                                                     <div className="flex justify-between pt-4">
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            onClick={toggleStopModal}
-                                                        >
-                                                            Cancel
-                                                        </Button>
+
                                                         <Button
                                                             type="submit"
                                                             className="bg-primary text-white"
@@ -507,9 +501,7 @@ export default function EditRoute() {
                                                     "Update Route"
                                                 )}
                                             </Button>
-                                            <Link href="/protected/route-manage">
-                                                <Button variant="outline" type="button">Cancel</Button>
-                                            </Link>
+
                                         </div>
                                     </form>
                                 </Form>
