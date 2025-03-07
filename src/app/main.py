@@ -10,6 +10,7 @@ from app.routes.add_station import router as add_station_router
 from app.routes.add_stop import router as add_stop_router
 from app.routes.add_train import router as add_train_router
 from app.routes.calculate_fare import router as calculate_fare_router
+from app.routes.get_dashboard_metrics import router as get_dashboard_metrics_router
 from app.routes.get_routes import router as get_routes_router
 from app.routes.get_routes_by_route_id import router as get_routes_by_route_id_router
 from app.routes.get_stations import router as get_stations_router
@@ -67,6 +68,7 @@ app.include_router(update_user_router, prefix="", tags=["Users"])
 app.include_router(get_user_history_router, prefix="", tags=["Users"])
 app.include_router(calculate_fare_router, prefix="", tags=["Tickets"])
 app.include_router(update_fare_router, prefix="", tags=["Tickets"])
+app.include_router(get_dashboard_metrics_router, prefix="", tags=["Dashboard"])
 
 
 @app.get("/")
