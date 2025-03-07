@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Loader2, Users, Train, MapPin, Route, AlertTriangle } from "lucide-react"
 
-// Define types for your data models
 interface Station {
     station_id: string;
     name: string;
@@ -31,7 +30,6 @@ interface RouteData {
     end_station_name: string;
 }
 
-// Define types for metrics
 interface DashboardMetrics {
     totalStations: number;
     totalTrains: number;
