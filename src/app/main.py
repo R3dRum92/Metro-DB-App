@@ -10,6 +10,8 @@ from app.routes.add_station import router as add_station_router
 from app.routes.add_stop import router as add_stop_router
 from app.routes.add_train import router as add_train_router
 from app.routes.calculate_fare import router as calculate_fare_router
+from app.routes.delete_route import router as delete_route_router
+from app.routes.delete_stop import router as delete_stop_router
 from app.routes.get_dashboard_metrics import router as get_dashboard_metrics_router
 from app.routes.get_routes import router as get_routes_router
 from app.routes.get_routes_by_route_id import router as get_routes_by_route_id_router
@@ -22,6 +24,8 @@ from app.routes.get_users_by_user_id import router as get_users_by_user_id_route
 from app.routes.signin import router as signin_router
 from app.routes.signup import router as signup_router
 from app.routes.update_fare import router as update_fare_router
+from app.routes.update_route import router as update_route_router
+from app.routes.update_stop import router as update_stop_router
 from app.routes.update_user import router as update_user_router
 from app.utils.logger import logger
 
@@ -33,7 +37,7 @@ async def lifespan(app: FastAPI):
 
     try:
         logger.info("Creating tables...")
-        await create_tables(connection)
+        # await create_tables(connection)
     finally:
         await connection.close()
         logger.info("Database connection closed")
@@ -55,7 +59,7 @@ app.include_router(get_users_router, prefix="", tags=["Users"])
 app.include_router(get_stations_router, prefix="", tags=["Stations"])
 app.include_router(get_stations_tickets_router, prefix="", tags=["Stations", "Tickets"])
 app.include_router(get_routes_router, prefix="", tags=["Routes"])
-app.include_router(get_routes_by_route_id_router, prefix="", tags="Routes")
+app.include_router(get_routes_by_route_id_router, prefix="", tags=["Routes"])
 app.include_router(get_trains_router, prefix="", tags=["Trains"])
 app.include_router(signup_router, prefix="", tags=["Users"])
 app.include_router(signin_router, prefix="", tags=["Users"])
@@ -69,6 +73,10 @@ app.include_router(get_user_history_router, prefix="", tags=["Users"])
 app.include_router(calculate_fare_router, prefix="", tags=["Tickets"])
 app.include_router(update_fare_router, prefix="", tags=["Tickets"])
 app.include_router(get_dashboard_metrics_router, prefix="", tags=["Dashboard"])
+app.include_router(update_route_router, prefix="", tags=["Routes"])
+app.include_router(delete_route_router, prefix="", tags=["Routes"])
+app.include_router(update_stop_router, prefix="", tags=["Routes"])
+app.include_router(delete_stop_router, prefix="", tags=["Routes"])
 
 
 @app.get("/")

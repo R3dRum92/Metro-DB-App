@@ -14,6 +14,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Route, Station } from "../page"
+import { Pencil, Trash } from "lucide-react"
 
 // Form schema for validation
 const formSchema = z.object({
@@ -23,7 +24,9 @@ const formSchema = z.object({
 })
 
 const stopFormSchema = z.object({
-    stop_int: z.string(),
+    stop_int: z.string().refine(val => /^\d+$/.test(val), {
+        message: "Stop number must be an integer value"
+    }),
     station_id: z.string()
 })
 
@@ -31,6 +34,113 @@ export type addStopActionResult = {
     success?: boolean
     message?: string
     errors?: Record<string, string[]>
+}
+
+export async function updateStop(formData: FormData, route_id: string): Promise<{ success?: boolean; message?: string; errors?: Record<string, string[]> }> {
+    try {
+        const stop_int = formData.get("stop_int"); // We still need this to identify the stop
+        const station_id = formData.get("station_id"); // This is what we're actually updating
+
+        const response = await fetch("http://localhost:8000/update_stop", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                route_id,
+                stop_int, // Used only as an identifier, not to update
+                station_id // The only field we're updating
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            return {
+                success: false,
+                message: "Updating Stop Failed",
+                errors: error.detail?.errors || { form: ["Server error occurred"] }
+            };
+        }
+
+        const data = await response.json();
+
+        return {
+            success: true,
+            message: data.message || "Station updated successfully"
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: "Failed to connect to server",
+            errors: { form: ["Network error occurred"] }
+        };
+    }
+}
+
+export async function deleteStop(route_id: string, station_id: string, stop_int: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const response = await fetch(`http://localhost:8000/delete_stop`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                route_id,
+                station_id,
+                stop_int
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            return {
+                success: false,
+                message: error.detail || "Failed to delete stop"
+            };
+        }
+
+        return {
+            success: true,
+            message: "Stop deleted successfully"
+        };
+    } catch (error) {
+        console.error("Error deleting stop:", error);
+        return {
+            success: false,
+            message: "Failed to connect to server"
+        };
+    }
+}
+
+export async function deleteRoute(route_id: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const response = await fetch(`http://localhost:8000/delete_route/${route_id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            return {
+                success: false,
+                message: error.detail || "Failed to delete route"
+            };
+        }
+
+        return {
+            success: true,
+            message: "Route deleted successfully"
+        };
+    } catch (error) {
+        console.error("Error deleting route:", error);
+        return {
+            success: false,
+            message: "Failed to connect to server"
+        };
+    }
 }
 
 export async function addStop(formData: FormData, route_id: string): Promise<addStopActionResult> {
@@ -229,6 +339,55 @@ export default function EditRoute() {
         })
     }
 
+    const handleDelete = () => {
+        if (window.confirm("Are you sure you want to delete this route? This action cannot be undone.")) {
+            startTransition(async () => {
+                const result = await deleteRoute(route_id);
+                if (result.success) {
+                    setMessage({ type: "success", content: result.message });
+                    // Redirect after successful deletion
+                    setTimeout(() => {
+                        window.location.href = "/protected/route-manage";
+                    }, 1500);
+                } else {
+                    setMessage({ type: "error", content: result.message });
+                }
+            });
+        }
+    };
+
+    const [editStopModal, setEditStopModal] = useState<boolean>(false);
+    const [currentStop, setCurrentStop] = useState<any>(null);
+
+    // Add handlers for stop actions
+    const handleDeleteStop = (station_id: string, stop_int: string) => {
+        if (window.confirm("Are you sure you want to delete this stop? This action cannot be undone.")) {
+            startTransition(async () => {
+                const result = await deleteStop(route_id, station_id, stop_int);
+                if (result.success) {
+                    setMessage({ type: "success", content: result.message });
+                    // Refresh the page to show updated stops
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    setMessage({ type: "error", content: result.message });
+                }
+            });
+        }
+    };
+
+    const handleEditStop = (stop: any) => {
+        setCurrentStop(stop);
+        setEditStopModal(true);
+        // Only pre-fill the station_id since stop_int shouldn't be editable
+        stopForm.reset({
+            stop_int: stop.stop_int.toString(), // We still need this for the form, but it will be disabled
+            station_id: stop.station_id.toString()
+        });
+    };
+
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
             <Card className="w-full max-w-4xl">
@@ -288,8 +447,8 @@ export default function EditRoute() {
                                 </div>
 
                                 {stopModal && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                        <div className="bg-white rounded-md p-6 w-[400px] max-w-md">
+                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setStopModal(false)}>
+                                        <div className="bg-white rounded-md p-6 w-[400px] max-w-md" onClick={(e) => e.stopPropagation()}>
                                             <h2 className="text-primary font-bold text-2xl mb-4">Add Stop</h2>
 
                                             <Form {...form}>
@@ -301,7 +460,18 @@ export default function EditRoute() {
                                                             <FormItem>
                                                                 <FormLabel>Stop No.</FormLabel>
                                                                 <FormControl>
-                                                                    <Input type="text" placeholder="Enter stop number" {...field} />
+                                                                    <Input
+                                                                        type="number"
+                                                                        placeholder="Enter stop number"
+                                                                        {...field}
+                                                                        onChange={(e) => {
+                                                                            // Only allow integer values
+                                                                            const value = e.target.value;
+                                                                            if (value === '' || /^\d+$/.test(value)) {
+                                                                                field.onChange(value);
+                                                                            }
+                                                                        }}
+                                                                    />
                                                                 </FormControl>
                                                                 <FormMessage />
                                                             </FormItem>
@@ -340,7 +510,13 @@ export default function EditRoute() {
                                                     />
 
                                                     <div className="flex justify-between pt-4">
-
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            onClick={toggleStopModal}
+                                                        >
+                                                            Cancel
+                                                        </Button>
                                                         <Button
                                                             type="submit"
                                                             className="bg-primary text-white"
@@ -371,7 +547,7 @@ export default function EditRoute() {
                                                     <TableHead>Stop No.</TableHead>
                                                     <TableHead>Station</TableHead>
                                                     <TableHead>Location</TableHead>
-                                                    <TableHead className="text-center">Ticket Price</TableHead>
+                                                    <TableHead className="text-center">Actions</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -380,14 +556,29 @@ export default function EditRoute() {
                                                         key={stop.route_id || `${stop.station_id}-${stop.stop_int}`}
                                                         className="hover:bg-gray-100"
                                                     >
-                                                        <TableCell>
-                                                            <Link href={`/protected/route-manage/${route_id}`} className="block w-full h-full">
-                                                                {stop.stop_int}
-                                                            </Link>
-                                                        </TableCell>
+                                                        <TableCell>{stop.stop_int}</TableCell>
                                                         <TableCell>{stop.station_name}</TableCell>
                                                         <TableCell>{stop.station_location || stop.station_location}</TableCell>
-                                                        <TableCell className="text-center">{stop.ticket_price || "-"}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center justify-center space-x-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="h-8 px-2"
+                                                                    onClick={() => handleEditStop(stop)}
+                                                                >
+                                                                    <Pencil className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="destructive"
+                                                                    className="h-8 px-2"
+                                                                    onClick={() => handleDeleteStop(stop.station_id.toString(), stop.stop_int.toString())}
+                                                                >
+                                                                    <Trash className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -402,6 +593,118 @@ export default function EditRoute() {
                                     </div>
                                 )}
                             </div>
+
+                            {editStopModal && (
+                                <div
+                                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                    onClick={() => setEditStopModal(false)}
+                                >
+                                    <div
+                                        className="bg-white rounded-md p-6 w-[400px] max-w-md"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <h2 className="text-primary font-bold text-2xl mb-4">Edit Stop</h2>
+
+                                        <Form {...stopForm}>
+                                            <form onSubmit={stopForm.handleSubmit((values) => {
+                                                // Handle form submission for editing stop
+                                                startTransition(async () => {
+                                                    const formData = new FormData();
+                                                    Object.entries(values).forEach(([key, value]) => formData.append(key, value));
+                                                    formData.append('old_stop_int', currentStop.stop_int);
+                                                    formData.append('old_station_id', currentStop.station_id);
+
+                                                    // You would need to create this function similar to addStop
+                                                    const result = await updateStop(formData, route_id);
+
+                                                    if (result?.success) {
+                                                        setMessage({ type: "success", content: "Stop updated successfully" });
+                                                        setEditStopModal(false);
+                                                        // Refresh to show changes
+                                                        window.location.reload();
+                                                    } else {
+                                                        setMessage({ type: "error", content: result?.message || "Failed to update stop" });
+                                                    }
+                                                });
+                                            })} className="space-y-4">
+                                                {/* Same fields as in addStop form */}
+                                                <FormField
+                                                    control={stopForm.control}
+                                                    name="stop_int"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Stop No. (cannot be changed)</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="Enter stop number"
+                                                                    {...field}
+                                                                    disabled={true} // Disable the input
+                                                                    className="bg-gray-100" // Optional: add a visual indicator that it's disabled
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+
+                                                <FormField
+                                                    control={stopForm.control}
+                                                    name="station_id"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Station</FormLabel>
+                                                            <Select
+                                                                onValueChange={field.onChange}
+                                                                defaultValue={field.value}
+                                                                value={field.value}
+                                                            >
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select a station" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {stations.map((station) => (
+                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                            {station.name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+
+                                                <div className="flex justify-between pt-4">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setEditStopModal(false)}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        className="bg-primary text-white"
+                                                        disabled={isPending}
+                                                    >
+                                                        {isPending ? (
+                                                            <>
+                                                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                                Updating...
+                                                            </>
+                                                        ) : (
+                                                            "Update Stop"
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        </Form>
+                                    </div>
+                                </div>
+                            )}
+
+
 
                             {/* Edit Form Section */}
                             <div className="pt-6 border-t">
@@ -488,6 +791,21 @@ export default function EditRoute() {
                                                 )}
                                             </Button>
 
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                onClick={handleDelete}
+                                                disabled={isPending}
+                                            >
+                                                {isPending ? (
+                                                    <>
+                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        Deleting...
+                                                    </>
+                                                ) : (
+                                                    "Delete Route"
+                                                )}
+                                            </Button>
                                         </div>
                                     </form>
                                 </Form>
