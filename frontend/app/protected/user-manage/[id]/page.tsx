@@ -68,6 +68,8 @@ export default function EditUser() {
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isPending, startTransition] = useTransition()
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [message, setMessage] = useState({ type: "", content: "" })
 
     // Form setup
@@ -117,6 +119,7 @@ export default function EditUser() {
 
     // Handle form submission
     function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsUpdating(true);
         startTransition(async () => {
             try {
                 const response = await fetch(`http://localhost:8000/users/${userId}`, {
@@ -143,12 +146,15 @@ export default function EditUser() {
             } catch (error) {
                 console.error("Error updating user:", error)
                 setMessage({ type: "error", content: error instanceof Error ? error.message : "Failed to update user" })
+            } finally {
+                setIsUpdating(false); // Reset updating state
             }
         })
     }
 
     const handleDelete = () => {
         if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            setIsDeleting(true);
             startTransition(async () => {
                 const result = await deleteUser(userId);
                 if (result.success) {
@@ -160,6 +166,7 @@ export default function EditUser() {
                 } else {
                     setMessage({ type: "error", content: result.message });
                 }
+                setIsDeleting(false);
             });
         }
     };
@@ -281,8 +288,8 @@ export default function EditUser() {
                                         />
 
                                         <div className="flex justify-between">
-                                            <Button type="submit" disabled={isPending}>
-                                                {isPending ? (
+                                            <Button type="submit" disabled={isUpdating || isDeleting}>
+                                                {isUpdating ? (
                                                     <>
                                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                                                         Updating...
@@ -296,15 +303,15 @@ export default function EditUser() {
                                                 type="button"
                                                 variant="destructive"
                                                 onClick={handleDelete}
-                                                disabled={isPending}
+                                                disabled={isUpdating || isDeleting}
                                             >
-                                                {isPending ? (
+                                                {isDeleting ? (
                                                     <>
                                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                                                         Deleting...
                                                     </>
                                                 ) : (
-                                                    "Delete Route"
+                                                    "Delete User"
                                                 )}
                                             </Button>
                                         </div>
