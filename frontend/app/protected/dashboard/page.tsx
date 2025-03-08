@@ -223,7 +223,7 @@ export default function Dashboard() {
                                         <MetricCard
                                             title="Trains"
                                             value={metrics.totalTrains}
-                                            icon={<Train className="h-6 w-6 text-green-500" />}
+                                            icon={<Train className="h-6 w-6 text-red-500" />}
                                             subtitle={`${metrics.activeTrainsPercentage.toFixed(1)}% active`}
                                         />
                                         <MetricCard

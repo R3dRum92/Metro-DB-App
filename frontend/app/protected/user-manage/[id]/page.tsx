@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import Link from "next/link"
+import { User } from "lucide-react"
 
 interface User {
     id: number
@@ -19,13 +20,6 @@ interface User {
     email: string
     phone: string
     wallet: number
-}
-
-interface HistoryEntry {
-    id: number
-    action: string
-    date: string
-    details: string
 }
 
 // Form schema for validation
@@ -45,8 +39,6 @@ export default function EditUser() {
     const [isLoading, setIsLoading] = useState(true)
     const [isPending, startTransition] = useTransition()
     const [message, setMessage] = useState({ type: "", content: "" })
-    const [historyData, setHistoryData] = useState<HistoryEntry[]>([])
-    const [historyLoading, setHistoryLoading] = useState<boolean>(false)
 
     // Form setup
     const form = useForm<z.infer<typeof formSchema>>({
@@ -82,8 +74,6 @@ export default function EditUser() {
                     wallet: data.wallet,
                 })
 
-                // Fetch user history
-                fetchUserHistory(data.id)
             } catch (error) {
                 console.error("Error fetching user details:", error)
                 setMessage({ type: "error", content: "Failed to load user details" })
@@ -94,24 +84,6 @@ export default function EditUser() {
 
         fetchUserDetails()
     }, [userId, form])
-
-    // Function to fetch user history
-    const fetchUserHistory = async (userId: number) => {
-        setHistoryLoading(true)
-
-        try {
-            const response = await fetch(`http://localhost:8000/users/${userId}/history`)
-            if (!response.ok) {
-                throw new Error(`Error fetching history: ${response.statusText}`)
-            }
-            const data: HistoryEntry[] = await response.json()
-            setHistoryData(data)
-        } catch (error) {
-            console.error("Error fetching user history:", error)
-        } finally {
-            setHistoryLoading(false)
-        }
-    }
 
     // Handle form submission
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -150,7 +122,11 @@ export default function EditUser() {
             <Card className="w-full max-w-4xl">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-primary text-2xl font-bold">User Details</CardTitle>
+                        <div className="flex items-center gap-2">
+                            <User className="text-primary" size={24} strokeWidth={3.5} />
+                            <CardTitle className="text-primary text-2xl font-bold"
+                            >User Details</CardTitle>
+                        </div>
                         <Link href="/protected/user-manage">
                             <Button variant="outline">Back to Users</Button>
                         </Link>
@@ -194,42 +170,6 @@ export default function EditUser() {
                                         <p className="font-medium">৳{user.wallet.toFixed(2)}</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* User History Section */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">User History</h3>
-                                {historyLoading ? (
-                                    <div className="flex justify-center py-4">
-                                        <Icons.spinner className="h-6 w-6 animate-spin text-primary" />
-                                    </div>
-                                ) : historyData.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableCaption>Recent activities</TableCaption>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Action</TableHead>
-                                                    <TableHead>Date</TableHead>
-                                                    <TableHead>Details</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {historyData.map((entry) => (
-                                                    <TableRow key={entry.id}>
-                                                        <TableCell>{entry.action}</TableCell>
-                                                        <TableCell>{new Date(entry.date).toLocaleString()}</TableCell>
-                                                        <TableCell>{entry.details}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">No history available for this user</p>
-                                    </div>
-                                )}
                             </div>
 
                             {/* Edit Form Section */}

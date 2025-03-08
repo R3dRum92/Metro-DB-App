@@ -14,7 +14,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Route, Station } from "../page"
-import { Pencil, Trash } from "lucide-react"
+import { Pencil, Trash, RouteIcon } from "lucide-react"
 
 // Form schema for validation
 const formSchema = z.object({
@@ -393,7 +393,10 @@ export default function EditRoute() {
             <Card className="w-full max-w-4xl">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-primary text-2xl font-bold">Route Details</CardTitle>
+                        <div className="flex items-center gap-2">
+                            <RouteIcon className="text-primary" size={24} strokeWidth={3.5} />
+                            <CardTitle className="text-primary text-2xl font-bold">Route Details</CardTitle>
+                        </div>
                         <Link href="/protected/route-manage">
                             <Button variant="outline">Back to Routes</Button>
                         </Link>
