@@ -13,6 +13,7 @@ from app.routes.calculate_fare import router as calculate_fare_router
 from app.routes.delete_route import router as delete_route_router
 from app.routes.delete_station import router as delete_station_router
 from app.routes.delete_stop import router as delete_stop_router
+from app.routes.delete_train import router as delete_train_router
 from app.routes.delete_user import router as delete_user_router
 from app.routes.get_dashboard_metrics import router as get_dashboard_metrics_router
 from app.routes.get_routes import router as get_routes_router
@@ -29,6 +30,7 @@ from app.routes.update_fare import router as update_fare_router
 from app.routes.update_route import router as update_route_router
 from app.routes.update_station import router as update_station_router
 from app.routes.update_stop import router as update_stop_router
+from app.routes.update_train import router as update_train_router
 from app.routes.update_user import router as update_user_router
 from app.utils.logger import logger
 
@@ -83,6 +85,8 @@ app.include_router(delete_stop_router, prefix="", tags=["Routes"])
 app.include_router(delete_user_router, prefix="", tags=["Users"])
 app.include_router(update_station_router, prefix="", tags=["Stations"])
 app.include_router(delete_station_router, prefix="", tags=["Stations"])
+app.include_router(update_train_router, prefix="", tags=["Trains"])
+app.include_router(delete_train_router, prefix="", tags={"Trains"})
 
 
 @app.get("/")
