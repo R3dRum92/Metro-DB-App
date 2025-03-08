@@ -20,7 +20,7 @@ const formSchema = z.object({
 })
 
 export interface Station {
-    id: string
+    station_id: string
     name: string
 }
 
@@ -280,27 +280,36 @@ export default function RouteManage() {
                                                         </FormControl>
                                                     </FormItem>
                                                 )} />
-                                                <FormField control={form.control} name="start_station_id" render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Start Station</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                            <SelectTrigger className="w-[280px]">
-                                                                <SelectValue placeholder="Select a station" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {isLoading ? (
-                                                                    <div>Loading...</div>
-                                                                ) : (
-                                                                    stations.map((station: Station) => (
-                                                                        <SelectItem value={station.id}>
-                                                                            {station.name}
-                                                                        </SelectItem>
-                                                                    ))
-                                                                )}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </FormItem>
-                                                )} />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="start_station_id"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Start Station</FormLabel>
+                                                            <FormControl>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <SelectTrigger className="w-[280px]">
+                                                                        <SelectValue placeholder="Select a station" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {isLoading ? (
+                                                                            <div>Loading...</div>
+                                                                        ) : (
+                                                                            stations.map((station) => (
+                                                                                <SelectItem key={station.station_id} value={station.station_id}>
+                                                                                    {station.name}
+                                                                                </SelectItem>
+                                                                            ))
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
                                                 <FormField control={form.control} name="end_station_id" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>End Station</FormLabel>
@@ -313,7 +322,7 @@ export default function RouteManage() {
                                                                     <div>Loading...</div>
                                                                 ) : (
                                                                     stations.map((station: Station) => (
-                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                        <SelectItem key={station.station_id} value={station.station_id}>
                                                                             {station.name}
                                                                         </SelectItem>
                                                                     ))
@@ -346,7 +355,7 @@ export default function RouteManage() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     )
 }
 

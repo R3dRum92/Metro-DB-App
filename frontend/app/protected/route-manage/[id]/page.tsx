@@ -329,8 +329,8 @@ export default function EditRoute() {
                     route_name: values.route_name,
                     start_station_id: Number(values.start_station_id),
                     end_station_id: Number(values.end_station_id),
-                    start_station_name: stations.find(s => s.id === values.start_station_id)?.name || "",
-                    end_station_name: stations.find(s => s.id === values.end_station_id)?.name || ""
+                    start_station_name: stations.find(s => s.station_id === values.start_station_id)?.name || "",
+                    end_station_name: stations.find(s => s.station_id === values.end_station_id)?.name || ""
                 })
             } catch (error) {
                 console.error("Error updating route:", error)
@@ -500,7 +500,7 @@ export default function EditRoute() {
                                                                             <div className="p-2">Loading...</div>
                                                                         ) : (
                                                                             stations.map((station) => (
-                                                                                <SelectItem key={station.id} value={station.id}>
+                                                                                <SelectItem key={station.station_id} value={station.station_id}>
                                                                                     {station.name}
                                                                                 </SelectItem>
                                                                             ))
@@ -667,7 +667,7 @@ export default function EditRoute() {
                                                                 </SelectTrigger>
                                                                 <SelectContent>
                                                                     {stations.map((station) => (
-                                                                        <SelectItem key={station.id} value={station.id}>
+                                                                        <SelectItem key={station.station_id} value={station.station_id}>
                                                                             {station.name}
                                                                         </SelectItem>
                                                                     ))}
@@ -744,7 +744,7 @@ export default function EditRoute() {
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {stations.map((station) => (
-                                                                <SelectItem key={station.id} value={station.id}>
+                                                                <SelectItem key={station.station_id} value={station.station_id}>
                                                                     {station.name}
                                                                 </SelectItem>
                                                             ))}
@@ -771,7 +771,7 @@ export default function EditRoute() {
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {stations.map((station) => (
-                                                                <SelectItem key={station.id} value={station.id}>
+                                                                <SelectItem key={station.station_id} value={station.station_id}>
                                                                     {station.name}
                                                                 </SelectItem>
                                                             ))}
