@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 
 interface Station {
-    id: string
+    station_id: string
     name: string
     location: string
 }
@@ -283,7 +283,7 @@ export default function TicketManage() {
                                                 <div className="p-2">Loading stations...</div>
                                             ) : (
                                                 stations.map((station) => (
-                                                    <SelectItem key={station.id} value={station.id}>
+                                                    <SelectItem key={station.station_id} value={station.station_id}>
                                                         {station.name} - {station.location}
                                                     </SelectItem>
                                                 ))
@@ -307,9 +307,9 @@ export default function TicketManage() {
                                                 <div className="p-2">Loading stations...</div>
                                             ) : (
                                                 stations
-                                                    .filter(station => station.id !== originStation)
+                                                    .filter(station => station.station_id !== originStation)
                                                     .map((station) => (
-                                                        <SelectItem key={station.id} value={station.id}>
+                                                        <SelectItem key={station.station_id} value={station.station_id}>
                                                             {station.name} - {station.location}
                                                         </SelectItem>
                                                     ))
@@ -408,7 +408,7 @@ export default function TicketManage() {
                                                 <div className="p-2">Loading stations...</div>
                                             ) : (
                                                 stations.map((station) => (
-                                                    <SelectItem key={station.id} value={station.id}>
+                                                    <SelectItem key={station.station_id} value={station.station_id}>
                                                         {station.name} - {station.location}
                                                     </SelectItem>
                                                 ))
@@ -439,9 +439,9 @@ export default function TicketManage() {
                                                 <div className="p-2">Loading stations...</div>
                                             ) : (
                                                 stations
-                                                    .filter(station => station.id !== updateOriginStation)
+                                                    .filter(station => station.station_id !== updateOriginStation)
                                                     .map((station) => (
-                                                        <SelectItem key={station.id} value={station.id}>
+                                                        <SelectItem key={station.station_id} value={station.station_id}>
                                                             {station.name} - {station.location}
                                                         </SelectItem>
                                                     ))

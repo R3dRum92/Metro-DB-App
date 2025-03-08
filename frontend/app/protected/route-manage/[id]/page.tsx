@@ -205,6 +205,8 @@ export default function EditRoute() {
     const [stations, setStations] = useState<Station[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isPending, startTransition] = useTransition()
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [message, setMessage] = useState({ type: "", content: "" })
     const [stopModal, setStopModal] = useState<boolean>(false)
 
@@ -306,6 +308,7 @@ export default function EditRoute() {
 
     // Handle form submission
     function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsUpdating(true);
         startTransition(async () => {
             try {
                 const response = await fetch(`http://localhost:8000/update_route/${route_id}`, {
@@ -335,12 +338,15 @@ export default function EditRoute() {
             } catch (error) {
                 console.error("Error updating route:", error)
                 setMessage({ type: "error", content: error instanceof Error ? error.message : "Failed to update route" })
+            } finally {
+                setIsUpdating(false); // Reset updating state
             }
         })
     }
 
     const handleDelete = () => {
         if (window.confirm("Are you sure you want to delete this route? This action cannot be undone.")) {
+            setIsDeleting(true);
             startTransition(async () => {
                 const result = await deleteRoute(route_id);
                 if (result.success) {
@@ -352,6 +358,7 @@ export default function EditRoute() {
                 } else {
                     setMessage({ type: "error", content: result.message });
                 }
+                setIsDeleting(false);
             });
         }
     };
@@ -783,8 +790,8 @@ export default function EditRoute() {
                                         />
 
                                         <div className="flex justify-between">
-                                            <Button type="submit" disabled={isPending}>
-                                                {isPending ? (
+                                            <Button type="submit" disabled={isUpdating}>
+                                                {isUpdating ? (
                                                     <>
                                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                                                         Updating...
@@ -798,9 +805,9 @@ export default function EditRoute() {
                                                 type="button"
                                                 variant="destructive"
                                                 onClick={handleDelete}
-                                                disabled={isPending}
+                                                disabled={isDeleting}
                                             >
-                                                {isPending ? (
+                                                {isDeleting ? (
                                                     <>
                                                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                                                         Deleting...
