@@ -402,7 +402,6 @@ export default function TrainManage() {
                                                         className="flex items-center"
                                                     >
                                                         <Edit className="h-4 w-4 mr-1" />
-                                                        Edit
                                                     </Button>
 
                                                     {/* Delete button */}
@@ -413,7 +412,6 @@ export default function TrainManage() {
                                                         className="flex items-center"
                                                     >
                                                         <Trash className="h-4 w-4 mr-1" />
-                                                        Delete
                                                     </Button>
                                                 </div>
                                             </TableCell>

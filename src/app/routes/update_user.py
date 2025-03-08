@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import EmailStr, Field
@@ -14,6 +14,7 @@ class UpdateUserRequest(BaseModel):
     email: Optional[EmailStr] = None
     phone: str = Field(..., pattern="^[0-9]{11}$")
     wallet: float = Field(..., ge=0)
+    dateOfBirth: Optional[date] = None
 
 
 @router.put("/users/{user_id}", response_model=UserDetailResponse)
@@ -65,16 +66,17 @@ async def update_user(user_id: uuid.UUID, user_data: UpdateUserRequest):
 
             # Update user details in transaction
             async with conn.transaction():
-                # Update user table
+                # Update user table with date_of_birth
                 await conn.execute(
                     """
                     UPDATE users 
-                    SET name = $1, email = $2, phone_number = $3
-                    WHERE id = $4
+                    SET name = $1, email = $2, phone_number = $3, date_of_birth = $4
+                    WHERE id = $5
                     """,
                     user_data.name,
                     user_data.email,
                     user_data.phone,
+                    user_data.dateOfBirth,
                     user_id,
                 )
 
@@ -89,10 +91,10 @@ async def update_user(user_id: uuid.UUID, user_data: UpdateUserRequest):
                     user_id,
                 )
 
-            # Get updated user details
+            # Get updated user details including date_of_birth
             updated_user = await conn.fetchrow(
                 """
-                SELECT u.id, u.name, u.email, u.phone_number, w.balance
+                SELECT u.id, u.name, u.email, u.phone_number, w.balance, u.date_of_birth
                 FROM users u
                 JOIN wallets w ON u.id = w.user_id
                 WHERE u.id = $1
@@ -106,6 +108,7 @@ async def update_user(user_id: uuid.UUID, user_data: UpdateUserRequest):
                 email=updated_user["email"],
                 phone=updated_user["phone_number"],
                 wallet=updated_user["balance"],
+                dateOfBirth=updated_user["date_of_birth"],
             )
 
         except HTTPException as e:

@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 
 from pydantic import EmailStr
@@ -13,6 +14,7 @@ class UserDetailResponse(BaseModel):
     email: Optional[EmailStr] = None
     phone: str
     wallet: float
+    dateOfBirth: Optional[date] = None
 
 
 @router.get("/users/{user_id}", response_model=UserDetailResponse)
@@ -22,7 +24,7 @@ async def get_user(user_id: uuid.UUID):
         try:
             user = await conn.fetchrow(
                 """
-                SELECT u.id, u.name, u.email, u.phone_number, w.balance
+                SELECT u.id, u.name, u.email, u.phone_number, w.balance, u.date_of_birth
                 FROM users u
                 JOIN wallets w ON u.id = w.user_id
                 WHERE u.id = $1
@@ -41,7 +43,9 @@ async def get_user(user_id: uuid.UUID):
                 email=user["email"],
                 phone=user["phone_number"],
                 wallet=user["balance"],
+                dateOfBirth=user["date_of_birth"],
             )
+
         except HTTPException as e:
             raise e
         except Exception as e:

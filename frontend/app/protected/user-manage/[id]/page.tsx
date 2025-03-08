@@ -20,6 +20,23 @@ interface User {
     email: string
     phone: string
     wallet: number
+    dateOfBirth?: string
+}
+
+// Function to calculate age from date of birth
+function calculateAge(dateOfBirth: string): number {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    // If the current month is before the birth month, or it's the birth month but before the birth day, subtract 1 from age
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+
+    return age;
 }
 
 // Form schema for validation
@@ -27,7 +44,11 @@ const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email"),
     phone: z.string().min(10, "Phone number must be at least 10 digits"),
-    wallet: z.coerce.number().min(0, "Wallet amount cannot be negative")
+    wallet: z.coerce.number().min(0, "Wallet amount cannot be negative"),
+    dateOfBirth: z.string().refine((val) => {
+        const date = new Date(val);
+        return !isNaN(date.getTime());
+    }, "Please enter a valid date")
 })
 
 export async function deleteUser(user_id: string): Promise<{ success: boolean; message: string }> {
@@ -79,7 +100,8 @@ export default function EditUser() {
             name: "",
             email: "",
             phone: "",
-            wallet: 0
+            wallet: 0,
+            dateOfBirth: ""
         },
     })
 
@@ -104,6 +126,7 @@ export default function EditUser() {
                     email: data.email,
                     phone: data.phone,
                     wallet: data.wallet,
+                    dateOfBirth: data.dateOfBirth || ""
                 })
 
             } catch (error) {
@@ -223,6 +246,18 @@ export default function EditUser() {
                                         <p className="text-sm text-gray-500">Wallet Balance</p>
                                         <p className="font-medium">৳{user.wallet.toFixed(2)}</p>
                                     </div>
+                                    {user.dateOfBirth && (
+                                        <>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Date of Birth</p>
+                                                <p className="font-medium">{new Date(user.dateOfBirth).toLocaleDateString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Age</p>
+                                                <p className="font-medium">{calculateAge(user.dateOfBirth)} years</p>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -267,6 +302,20 @@ export default function EditUser() {
                                                     <FormLabel>Phone</FormLabel>
                                                     <FormControl>
                                                         <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="dateOfBirth"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Date of Birth</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="date" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>

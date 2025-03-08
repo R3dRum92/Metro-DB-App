@@ -22,6 +22,10 @@ const formSchema = z.object({
   ]),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().regex(/^01[0-9]{9}$/, "Invalid phone number"),
+  dateOfBirth: z.string().refine((val) => {
+    const date = new Date(val);
+    return !isNaN(date.getTime());
+  }, "Please enter a valid date"),
 });
 
 export default function SignUpPage() {
@@ -41,6 +45,7 @@ export default function SignUpPage() {
       email: "",
       password: "",
       phone: "",
+      dateOfBirth: "",
     },
   });
 
@@ -137,6 +142,23 @@ export default function SignUpPage() {
                     <FormMessage />
                     {serverErrors.phone && (
                       <p className="text-sm font-medium text-destructive">{serverErrors.phone[0]}</p>
+                    )}
+                  </FormItem>
+                )}
+              />
+              {/* Date of Birth Field */}
+              <FormField
+                control={form.control}
+                name="dateOfBirth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    {serverErrors.dateOfBirth && (
+                      <p className="text-sm font-medium text-destructive">{serverErrors.dateOfBirth[0]}</p>
                     )}
                   </FormItem>
                 )}
