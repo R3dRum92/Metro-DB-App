@@ -30,6 +30,36 @@ const formSchema = z.object({
     wallet: z.coerce.number().min(0, "Wallet amount cannot be negative")
 })
 
+export async function deleteUser(user_id: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const response = await fetch(`http://localhost:8000/delete_user/${user_id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            return {
+                success: false,
+                message: error.detail || "Failed to delete user"
+            };
+        }
+
+        return {
+            success: true,
+            message: "User deleted successfully"
+        };
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        return {
+            success: false,
+            message: "Failed to connect to server"
+        };
+    }
+}
+
 export default function EditUser() {
     const params = useParams()
     const router = useRouter()
@@ -116,6 +146,23 @@ export default function EditUser() {
             }
         })
     }
+
+    const handleDelete = () => {
+        if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            startTransition(async () => {
+                const result = await deleteUser(userId);
+                if (result.success) {
+                    setMessage({ type: "success", content: result.message });
+                    // Redirect after successful deletion
+                    setTimeout(() => {
+                        window.location.href = "/protected/user-manage";
+                    }, 1500);
+                } else {
+                    setMessage({ type: "error", content: result.message });
+                }
+            });
+        }
+    };
 
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
@@ -242,6 +289,22 @@ export default function EditUser() {
                                                     </>
                                                 ) : (
                                                     "Update User"
+                                                )}
+                                            </Button>
+
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                onClick={handleDelete}
+                                                disabled={isPending}
+                                            >
+                                                {isPending ? (
+                                                    <>
+                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        Deleting...
+                                                    </>
+                                                ) : (
+                                                    "Delete Route"
                                                 )}
                                             </Button>
                                         </div>

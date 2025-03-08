@@ -89,21 +89,6 @@ async def update_user(user_id: uuid.UUID, user_data: UpdateUserRequest):
                     user_id,
                 )
 
-                # Add entry to user history
-                history_id = uuid.uuid4()
-                now = datetime.now()
-                await conn.execute(
-                    """
-                    INSERT INTO user_history (id, user_id, action, date, details)
-                    VALUES ($1, $2, $3, $4, $5)
-                    """,
-                    history_id,
-                    user_id,
-                    "User Updated",
-                    now,
-                    f"User details updated: Name={user_data.name}, Email={user_data.email}, Phone={user_data.phone}, Wallet={user_data.wallet}",
-                )
-
             # Get updated user details
             updated_user = await conn.fetchrow(
                 """
