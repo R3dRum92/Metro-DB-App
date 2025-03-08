@@ -4,7 +4,7 @@ router = APIRouter()
 
 
 class StationResponse(BaseModel):
-    id: uuid.UUID
+    station_id: uuid.UUID
     name: str
     location: str
     status: str
@@ -20,7 +20,7 @@ async def get_stations():
             )
             stations = [
                 StationResponse(
-                    id=row["station_id"],
+                    station_id=row["station_id"],
                     name=row["station_name"],
                     location=row["location"],
                     status=row["status"],
