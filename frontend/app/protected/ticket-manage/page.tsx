@@ -15,12 +15,32 @@ interface Station {
     station_id: string
     name: string
     location: string
+    route_id?: string
+}
+
+interface Route {
+    route_id: string
+    name: string
+    color: string
+}
+
+interface RouteSegment {
+    origin_station_name: string
+    destination_station_name: string
+    origin_station_id: string
+    destination_station_id: string
+    route_id: string
+    route_name: string
+    price: number
 }
 
 interface FareResponse {
     origin_station_name: string
     destination_station_name: string
-    price: number
+    total_price: number
+    intermediate_stations: string[]
+    segments: RouteSegment[]
+    requires_route_change: boolean
 }
 
 interface FareUpdate {
@@ -31,6 +51,7 @@ interface FareUpdate {
 
 export default function TicketManage() {
     const [stations, setStations] = useState<Station[]>([])
+    const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState(true)
     const [originStation, setOriginStation] = useState<string>("")
     const [destinationStation, setDestinationStation] = useState<string>("")
@@ -46,25 +67,34 @@ export default function TicketManage() {
     const [updating, setUpdating] = useState(false)
     const [currentPrice, setCurrentPrice] = useState<number | null>(null)
 
-    // Fetch stations
+    // Fetch stations and routes
     useEffect(() => {
-        async function fetchStations() {
+        async function fetchData() {
             try {
-                const response = await fetch("http://localhost:8000/stations_ticket")
-                if (!response.ok) {
-                    throw new Error(`Error fetching stations: ${response.statusText}`)
+                // Fetch stations
+                const stationsResponse = await fetch("http://localhost:8000/stations_ticket")
+                if (!stationsResponse.ok) {
+                    throw new Error(`Error fetching stations: ${stationsResponse.statusText}`)
                 }
-                const data = await response.json()
-                setStations(data)
+                const stationsData = await stationsResponse.json()
+                setStations(stationsData)
+
+                // Fetch routes
+                const routesResponse = await fetch("http://localhost:8000/routes")
+                if (!routesResponse.ok) {
+                    throw new Error(`Error fetching routes: ${routesResponse.statusText}`)
+                }
+                const routesData = await routesResponse.json()
+                setRoutes(routesData)
             } catch (error) {
-                console.error("Error fetching stations:", error)
-                setErrorMessage("Failed to load stations. Please try again later.")
+                console.error("Error fetching data:", error)
+                setErrorMessage("Failed to load data. Please try again later.")
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchStations()
+        fetchData()
     }, [])
 
     // Calculate fare between stations
@@ -121,7 +151,7 @@ export default function TicketManage() {
             }
 
             const data = await response.json()
-            setCurrentPrice(data.price)
+            setCurrentPrice(data.total_price)
             setUpdateStatus(null)
         } catch (error) {
             console.error("Error fetching current price:", error)
@@ -207,6 +237,12 @@ export default function TicketManage() {
         setUpdateStatus(null)
     }
 
+    // Get route color for visual indicators
+    const getRouteColor = (routeId: string) => {
+        const route = routes.find(r => r.route_id === routeId)
+        return route?.color || "#888888"
+    }
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
             {/* Header Card */}
@@ -233,8 +269,8 @@ export default function TicketManage() {
                             </svg>
                         </div>
                         <div>
-                            <CardTitle className="text-primary text-2xl font-bold">Ticket / Fare</CardTitle>
-                            <CardDescription>Manage metro tickets and calculate fares</CardDescription>
+                            <CardTitle className="text-primary text-2xl font-bold">Dhaka Metro Fare Calculator</CardTitle>
+                            <CardDescription>Calculate fares across multiple metro routes</CardDescription>
                         </div>
                     </div>
                     <Button variant="outline" className="hidden sm:flex" asChild>
@@ -259,7 +295,7 @@ export default function TicketManage() {
                             <div>
                                 <h2 className="text-xl font-semibold">Calculate Ticket Fare Between Stations</h2>
                                 <p className="text-gray-600 text-sm mt-1">
-                                    Select origin and destination stations to calculate the fares. All fares are calculated as per Dhaka Traffic Coordination Authority circular of 8 September 2022.
+                                    Select origin and destination stations to calculate fares. The system will find the optimal route including any necessary transfers between lines.
                                 </p>
                             </div>
 
@@ -320,22 +356,67 @@ export default function TicketManage() {
 
                                 {fare && (
                                     <div className="p-4 bg-gray-50 rounded-lg">
-                                        <h3 className="font-medium text-gray-800 mb-2">Fare Details</h3>
-                                        <div className="space-y-2">
-                                            <p className="text-sm">
-                                                <span className="font-medium">From:</span> {fare.origin_station_name}
+                                        <h3 className="font-medium text-gray-800 mb-3">Journey Details</h3>
+
+                                        {/* Journey Overview */}
+                                        <div className="mb-4">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <p className="text-sm font-medium">From: {fare.origin_station_name}</p>
+                                                <p className="text-sm font-medium">To: {fare.destination_station_name}</p>
+                                            </div>
+                                            <p className="text-lg font-bold text-primary border-t pt-2 mt-2">
+                                                Total Fare: ৳{fare.total_price.toFixed(2)}
                                             </p>
-                                            <p className="text-sm">
-                                                <span className="font-medium">To:</span> {fare.destination_station_name}
-                                            </p>
-                                            <p className="text-lg font-bold text-primary">
-                                                Fare: ৳{fare.price.toFixed(2)}
-                                            </p>
+                                        </div>
+
+                                        {/* Route Change Information */}
+                                        {fare.requires_route_change && (
+                                            <Alert className="mb-3 bg-yellow-50 text-yellow-800">
+                                                <AlertDescription>
+                                                    <div className="flex items-center space-x-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-600">
+                                                            <path d="M3 12h6V6" />
+                                                            <path d="M9 12v6" />
+                                                            <path d="M21 12h-6V6" />
+                                                            <path d="M15 12v6" />
+                                                        </svg>
+                                                        <span>This journey requires route changes at: {fare.intermediate_stations.join(", ")}</span>
+                                                    </div>
+                                                </AlertDescription>
+                                            </Alert>
+                                        )}
+
+                                        {/* Journey Segments */}
+                                        <div className="space-y-3">
+                                            <h4 className="text-sm font-medium">Journey Segments:</h4>
+                                            {fare.segments.map((segment, index) => (
+                                                <div key={index} className="border rounded-md p-3">
+                                                    <div className="flex items-center space-x-2 mb-2">
+                                                        <div
+                                                            className="w-3 h-3 rounded-full"
+                                                            style={{ backgroundColor: getRouteColor(segment.route_id) }}
+                                                        />
+                                                        <span className="text-sm font-medium">{segment.route_name}</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div>
+                                                            <p className="text-gray-500">From</p>
+                                                            <p>{segment.origin_station_name}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-gray-500">To</p>
+                                                            <p>{segment.destination_station_name}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-2 pt-2 border-t">
+                                                        <p className="text-sm">Segment Fare: ৳{segment.price.toFixed(2)}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+
                                         </div>
                                     </div>
                                 )}
-
-
 
                                 {errorMessage && (
                                     <div className="p-4 bg-red-50 text-red-700 rounded-lg">
@@ -376,10 +457,10 @@ export default function TicketManage() {
 
                             <div className="flex justify-center sm:justify-start space-x-3 pt-2">
                                 <Button variant="outline" size="sm" asChild>
-                                    <Link href="#">Station Map</Link>
+                                    <Link href="#">Metro Map</Link>
                                 </Button>
                                 <Button variant="outline" size="sm" asChild>
-                                    <Link href="#">Plan a Journey</Link>
+                                    <Link href="#">Service Schedule</Link>
                                 </Button>
                             </div>
                         </TabsContent>
@@ -512,31 +593,45 @@ export default function TicketManage() {
                 </CardContent>
             </Card>
 
-            {/* Additional Information Card */}
+            {/* Route Information Card */}
             <Card className="w-full max-w-4xl">
                 <CardHeader>
-                    <CardTitle className="text-lg font-semibold">Ticket Information</CardTitle>
+                    <CardTitle className="text-lg font-semibold">Metro Route Information</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-medium text-gray-800 mb-2">Ticket Types</h3>
-                                <ul className="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Single Journey Ticket</li>
-                                    <li>MRT Pass (Daily/Weekly/Monthly)</li>
-                                </ul>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-medium text-gray-800 mb-2">Purchase Options</h3>
-                                <ul className="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Ticket Vending Machines</li>
-                                    <li>Station Counters</li>
-                                </ul>
-                            </div>
+                            {routes.map((route) => (
+                                <div key={route.route_id} className="bg-gray-50 p-4 rounded-lg border-l-4" style={{ borderLeftColor: route.color }}>
+                                    <h3 className="font-medium text-gray-800 mb-2">{route.name}</h3>
+                                    <div className="text-sm">
+                                        <p className="text-gray-600">
+                                            <span className="font-medium">Route ID:</span> {route.route_id}
+                                        </p>
+                                        <p className="mt-1">
+                                            Key stations: {stations
+                                                .filter(station => station.route_id === route.route_id)
+                                                .slice(0, 3)
+                                                .map(station => station.name)
+                                                .join(", ")}
+                                            {stations.filter(station => station.route_id === route.route_id).length > 3 && "..."}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="font-medium text-gray-800 mb-2">Transfer Information</h3>
+                            <p className="text-sm">
+                                When traveling between different metro lines, transfers are required at interchange stations.
+                                A small transfer fee may be applied to your total fare. The system will automatically calculate
+                                the most efficient route and show all segments of your journey.
+                            </p>
+                        </div>
+
                         <p className="text-sm text-gray-600">
-                            For more information on ticketing options and fare policies, please visit the official
+                            For more information on metro routes and fares, please visit the official
                             <a href="/protected/dashboard" className="text-blue-600 hover:underline"> Dhaka Metro Rail website</a>.
                         </p>
                     </div>
