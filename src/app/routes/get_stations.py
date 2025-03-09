@@ -15,9 +15,8 @@ async def get_stations():
     try:
         conn = await get_db_connection()
         try:
-            rows = await conn.fetch(
-                "SELECT * FROM stations ORDER BY status, location, station_name"
-            )
+            rows = await conn.fetch("SELECT * FROM station_view")
+            logger.info(rows)
             stations = [
                 StationResponse(
                     station_id=row["station_id"],

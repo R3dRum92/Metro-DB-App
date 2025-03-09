@@ -27,6 +27,7 @@ from app.routes.get_trains import router as get_trains_router
 from app.routes.get_user_history import router as get_user_history_router
 from app.routes.get_users import router as get_users_router
 from app.routes.get_users_by_user_id import router as get_users_by_user_id_router
+from app.routes.routes_stations import router as count_stations_router
 from app.routes.signin import router as signin_router
 from app.routes.signup import router as signup_router
 from app.routes.update_fare import router as update_fare_router
@@ -93,6 +94,7 @@ app.include_router(delete_station_router, prefix="", tags=["Stations"])
 app.include_router(update_train_router, prefix="", tags=["Trains"])
 app.include_router(delete_train_router, prefix="", tags={"Trains"})
 app.include_router(user_demographics_router, prefix="", tags=["Users"])
+app.include_router(count_stations_router, prefix="", tags=["Routes", "Stations"])
 
 
 @app.get("/")

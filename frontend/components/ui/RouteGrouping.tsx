@@ -32,7 +32,7 @@ const RouteGrouping = () => {
             setError(null)
             try {
                 // Fetch route-station data
-                const response = await fetch("http://localhost:8000/route_stations")
+                const response = await fetch("http://localhost:8000/routes_stations")
                 if (!response.ok) {
                     // If the endpoint doesn't exist yet, we'll use a fallback
                     throw new Error("Failed to fetch route stations data")
