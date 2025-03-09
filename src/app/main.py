@@ -35,6 +35,7 @@ from app.routes.update_station import router as update_station_router
 from app.routes.update_stop import router as update_stop_router
 from app.routes.update_train import router as update_train_router
 from app.routes.update_user import router as update_user_router
+from app.routes.user_demographics import router as user_demographics_router
 from app.utils.logger import logger
 
 
@@ -45,7 +46,7 @@ async def lifespan(app: FastAPI):
 
     try:
         logger.info("Creating tables...")
-        await build_graph()
+        # await build_graph()
         # await create_tables(connection)
     finally:
         await connection.close()
@@ -91,6 +92,7 @@ app.include_router(update_station_router, prefix="", tags=["Stations"])
 app.include_router(delete_station_router, prefix="", tags=["Stations"])
 app.include_router(update_train_router, prefix="", tags=["Trains"])
 app.include_router(delete_train_router, prefix="", tags={"Trains"})
+app.include_router(user_demographics_router, prefix="", tags=["Users"])
 
 
 @app.get("/")
