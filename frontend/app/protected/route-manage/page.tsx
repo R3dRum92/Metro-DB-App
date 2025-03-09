@@ -58,8 +58,6 @@ export type addRouteActionResult = {
     errors?: Record<string, string[]>
 }
 
-
-
 export async function addRoute(formData: FormData): Promise<addRouteActionResult> {
     const validatedFields = formSchema.safeParse({
         route_name: formData.get("route_name"),
@@ -94,8 +92,6 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
                 message: "Adding Routes Failed",
                 errors: error.detail.errors || { form: ["Server error occurred"] }
             }
-        } else {
-
         }
 
         const data = await response.json()
@@ -115,10 +111,9 @@ export async function addRoute(formData: FormData): Promise<addRouteActionResult
 }
 
 export default function RouteManage() {
-
     const [routes, setRoutes] = useState<Route[]>([])
     const [loading, setLoading] = useState<boolean>(true)
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState("")
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [stations, setStations] = useState<Station[]>([])
@@ -194,89 +189,105 @@ export default function RouteManage() {
 
     const filteredStations = routes.filter((route) =>
         route.route_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        route.start_station_name.toLowerCase().includes(searchQuery.toLowerCase()) || route.end_station_name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        route.start_station_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        route.end_station_name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle className="text-primary text-2xl font-bold text-center">Route Management</CardTitle>
+        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
+            <Card className="w-full max-w-6xl shadow-lg">
+                <CardHeader className="bg-primary/5 rounded-t-lg py-6">
+                    <CardTitle className="text-primary text-3xl font-bold text-center">Route Management System</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-center text-sm text-gray-500 mb-6">
+                <CardContent className="p-8">
+                    <p className="text-center text-lg text-gray-600 mb-8">
                         Here you can manage routes, optimize metro system routes, and monitor route performance.
                     </p>
 
-                    <div className="flex flex-col items-center space-y-4 mb-6">
-                        <div className="relative flex-grow w-full max-w-md">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <SearchIcon className="h-5 w-5 text-primary/70" />
+                    <div className="flex flex-col items-center space-y-6 mb-8">
+                        <div className="relative flex-grow w-full max-w-xl">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <SearchIcon className="h-6 w-6 text-primary/70" />
                             </div>
                             <Input
                                 type="search"
                                 placeholder="Search routes by name or station"
-                                className="pl-10 pr-4 py-2 w-full border border-primary/20 focus:ring-2 focus:ring-primary/30 rounded-lg"
+                                className="pl-12 pr-4 py-3 w-full text-lg border-2 border-primary/20 focus:ring-4 focus:ring-primary/30 rounded-lg"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-4 mt-6">
+                    <div className="space-y-6 mt-8">
                         {loading ? (
-                            <div className="flex justify-center py-8">
-                                <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                            <div className="flex justify-center py-12">
+                                <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
                             </div>
                         ) : (
-                            <Table>
-                                <TableCaption>A list of metro routes and their details</TableCaption>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Route Name</TableHead>
-                                        <TableHead>Start Station</TableHead>
-                                        <TableHead>End Station</TableHead>
-                                        <TableHead className="text-center">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredStations.map((route) => (
-                                        <TableRow
-                                            key={route.route_id}
-                                            className="hover:bg-gray-100"
-                                        >
-                                            <TableCell>
-                                                <Link href={`/protected/route-manage/${route.route_id}`} className="block w-full h-full">
-                                                    {route.route_name}
-                                                </Link>
-                                            </TableCell>
-                                            <TableCell>{route.start_station_name}</TableCell>
-                                            <TableCell>{route.end_station_name}</TableCell>
-                                            <TableCell className="text-center">
-                                                <Link href={`/protected/route-manage/${route.route_id}`} className="text-blue-500 hover:underline">
-                                                    Edit
-                                                </Link>
-                                            </TableCell>
+                            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+                                <Table className="w-full">
+                                    <TableCaption className="text-lg font-medium py-4">A list of metro routes and their details</TableCaption>
+                                    <TableHeader className="bg-gray-50">
+                                        <TableRow className="border-b-2 border-gray-200">
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Route Name</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Start Station</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">End Station</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-center text-gray-700">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredStations.map((route) => (
+                                            <TableRow
+                                                key={route.route_id}
+                                                className="hover:bg-primary/5 transition-colors border-b border-gray-200"
+                                            >
+                                                <TableCell className="py-4 px-6 text-base font-medium">
+                                                    <Link href={`/protected/route-manage/${route.route_id}`} className="block w-full h-full text-primary hover:text-primary/80 transition-colors">
+                                                        {route.route_name}
+                                                    </Link>
+                                                </TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{route.start_station_name}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{route.end_station_name}</TableCell>
+                                                <TableCell className="py-4 px-6 text-center">
+                                                    <Link
+                                                        href={`/protected/route-manage/${route.route_id}`}
+                                                        className="text-blue-600 hover:text-blue-800 transition-colors hover:underline text-base font-medium"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         )}
-                        <div className="mt-6 text-center">
-                            <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleModal}>Add Route</Button>
+                        <div className="mt-8 text-center">
+                            <Button
+                                className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors shadow-md"
+                                onClick={toggleModal}
+                            >
+                                Add New Route
+                            </Button>
                             {isModalOpen && (
-                                <div style={modalStyles} onClick={(e) => {
+                                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50" onClick={(e) => {
                                     if (e.target === e.currentTarget) toggleModal();
                                 }}>
-                                    <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
-                                        <h2 className="text-primary font-bold text-2xl">Route Form</h2>
+                                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                                        <h2 className="text-primary font-bold text-2xl mb-6 text-center">Add New Route</h2>
                                         <Form {...form}>
                                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                                 <FormField control={form.control} name="route_name" render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Route Name</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Route Name</FormLabel>
                                                         <FormControl>
-                                                            <Input type="text" {...field} />
+                                                            <Input
+                                                                type="text"
+                                                                className="p-3 text-base border-2 rounded-md"
+                                                                placeholder="Enter route name"
+                                                                {...field}
+                                                            />
                                                         </FormControl>
                                                     </FormItem>
                                                 )} />
@@ -285,21 +296,25 @@ export default function RouteManage() {
                                                     name="start_station_id"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Start Station</FormLabel>
+                                                            <FormLabel className="text-lg font-medium">Start Station</FormLabel>
                                                             <FormControl>
                                                                 <Select
                                                                     onValueChange={field.onChange}
                                                                     defaultValue={field.value}
                                                                 >
-                                                                    <SelectTrigger className="w-[280px]">
+                                                                    <SelectTrigger className="w-full p-3 text-base border-2 rounded-md">
                                                                         <SelectValue placeholder="Select a station" />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
+                                                                    <SelectContent className="max-h-80">
                                                                         {isLoading ? (
-                                                                            <div>Loading...</div>
+                                                                            <div className="p-4 text-center">Loading stations...</div>
                                                                         ) : (
                                                                             stations.map((station) => (
-                                                                                <SelectItem key={station.station_id} value={station.station_id}>
+                                                                                <SelectItem
+                                                                                    key={station.station_id}
+                                                                                    value={station.station_id}
+                                                                                    className="text-base py-2"
+                                                                                >
                                                                                     {station.name}
                                                                                 </SelectItem>
                                                                             ))
@@ -312,17 +327,21 @@ export default function RouteManage() {
                                                 />
                                                 <FormField control={form.control} name="end_station_id" render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>End Station</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                            <SelectTrigger className="w-[280px]">
+                                                        <FormLabel className="text-lg font-medium">End Station</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <SelectTrigger className="w-full p-3 text-base border-2 rounded-md">
                                                                 <SelectValue placeholder="Select a station" />
                                                             </SelectTrigger>
-                                                            <SelectContent>
+                                                            <SelectContent className="max-h-80">
                                                                 {isLoading ? (
-                                                                    <div>Loading...</div>
+                                                                    <div className="p-4 text-center">Loading stations...</div>
                                                                 ) : (
                                                                     stations.map((station: Station) => (
-                                                                        <SelectItem key={station.station_id} value={station.station_id}>
+                                                                        <SelectItem
+                                                                            key={station.station_id}
+                                                                            value={station.station_id}
+                                                                            className="text-base py-2"
+                                                                        >
                                                                             {station.name}
                                                                         </SelectItem>
                                                                     ))
@@ -331,23 +350,32 @@ export default function RouteManage() {
                                                         </Select>
                                                     </FormItem>
                                                 )} />
-                                                <Button type="submit" className="w-full" disabled={isPending}>
-                                                    {isPending ? (
-                                                        <>
-                                                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                                                            Adding...
-                                                        </>
-                                                    ) : (
-                                                        "Add Route"
-                                                    )}
-                                                </Button>
+                                                <div className="flex gap-4 pt-4">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        className="w-1/2 p-3 text-base font-medium border-2 rounded-md"
+                                                        onClick={toggleModal}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        className="w-1/2 p-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md"
+                                                        disabled={isPending}
+                                                    >
+                                                        {isPending ? (
+                                                            <>
+                                                                <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
+                                                                Adding...
+                                                            </>
+                                                        ) : (
+                                                            "Add Route"
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </form>
                                         </Form>
-                                        <div className="flex justify-center mt-3">
-                                            <button onClick={toggleModal} style={closeButtonStyles}>
-                                                Close
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -355,37 +383,8 @@ export default function RouteManage() {
                     </div>
                 </CardContent>
             </Card>
-        </div >
+        </div>
     )
-}
-
-const modalStyles: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-}
-
-const modalContentStyles: React.CSSProperties = {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '5px',
-    width: '300px',
-}
-
-const closeButtonStyles: React.CSSProperties = {
-    marginTop: '10px',
-    backgroundColor: 'red',
-    color: 'white',
-    fontSize: '12px',
-    border: 'none',
-    padding: '6px',
-    borderRadius: '5px',
 }
 
 function SearchIcon(props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) {

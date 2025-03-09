@@ -331,110 +331,133 @@ export default function TrainManage() {
     )
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle className="text-primary text-2xl font-bold text-center">Train Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-center text-sm text-gray-500 mb-6">
+        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
+            <Card className="w-full max-w-6xl shadow-lg">
+                <CardHeader className="bg-primary/5 rounded-t-lg py-6">
+                    <div className="flex items-center justify-center mb-2">
+                        <TrainIcon className="text-primary mr-3" width={32} height={32} strokeWidth="2.5" />
+                        <CardTitle className="text-primary text-3xl font-bold text-center">Train Management</CardTitle>
+                    </div>
+                    <p className="text-center text-lg text-gray-600 mt-2">
                         Here you can monitor train statuses, manage schedules, and perform maintenance tasks.
                     </p>
-
+                </CardHeader>
+                <CardContent className="p-8">
                     {actionMessage && (
-                        <div className={`p-3 mb-4 rounded-md ${actionMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {actionMessage.text}
-                            <button
-                                className="float-right font-bold"
-                                onClick={() => setActionMessage(null)}
-                            >
-                                ×
-                            </button>
+                        <div className={`p-4 mb-6 rounded-lg border ${actionMessage.type === 'success' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300'}`}>
+                            <div className="flex justify-between items-center">
+                                <span className="text-base">{actionMessage.text}</span>
+                                <button
+                                    className="text-xl font-bold hover:text-gray-700 transition-colors"
+                                    onClick={() => setActionMessage(null)}
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
                     )}
 
-                    <div className="flex flex-col items-center space-y-4 mb-6">
-                        <div className="relative flex-grow w-full max-w-md">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <SearchIcon className="h-5 w-5 text-primary/70" />
+                    <div className="flex flex-col items-center space-y-6 mb-8">
+                        <div className="relative flex-grow w-full max-w-xl">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <SearchIcon className="h-6 w-6 text-primary/70" />
                             </div>
                             <Input
                                 type="search"
                                 placeholder="Search trains by code, route or status"
-                                className="pl-10 pr-4 py-2 w-full border border-primary/20 focus:ring-2 focus:ring-primary/30 rounded-lg"
+                                className="pl-12 pr-4 py-3 w-full text-lg border-2 border-primary/20 focus:ring-4 focus:ring-primary/30 rounded-lg"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md">
-                        {loading ? (
-                            <div className="flex justify-center py-8">
-                                <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
-                            </div>
-                        ) : (
-                            <Table>
-                                <TableCaption>A list of metro trains and their details</TableCaption>
-                                <TableHeader className="sticky top-0 bg-white" style={{ zIndex: 1 }}>
-                                    <TableRow>
-                                        <TableHead>Train Code</TableHead>
-                                        <TableHead>Route Name</TableHead>
-                                        <TableHead>Capacity</TableHead>
-                                        <TableHead>Operational Status</TableHead>
-                                        <TableHead className="text-center">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredTrains.map((train) => (
-                                        <TableRow key={train.train_id}>
-                                            <TableCell>{train.train_code}</TableCell>
-                                            <TableCell>{train.route_name}</TableCell>
-                                            <TableCell>{train.capacity}</TableCell>
-                                            <TableCell>{train.operational_status}</TableCell>
-                                            <TableCell className="text-center">
-                                                <div className="flex justify-center space-x-2">
-                                                    {/* Edit button */}
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openEditModal(train)}
-                                                        className="flex items-center"
-                                                    >
-                                                        <Edit className="h-4 w-4 mr-1" />
-                                                    </Button>
-
-                                                    {/* Delete button */}
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={() => handleDelete(train.train_id)}
-                                                        className="flex items-center"
-                                                    >
-                                                        <Trash className="h-4 w-4 mr-1" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
+                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-md">
+                        <div className="max-h-96 overflow-y-auto">
+                            {loading ? (
+                                <div className="flex justify-center py-12">
+                                    <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
+                                </div>
+                            ) : (
+                                <Table className="w-full">
+                                    <TableCaption className="text-lg font-medium py-4">
+                                        A list of metro trains and their details
+                                    </TableCaption>
+                                    <TableHeader className="sticky top-0 bg-gray-50" style={{ zIndex: 1 }}>
+                                        <TableRow className="border-b-2 border-gray-200">
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700 w-1/5">Train Code</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700 w-1/5">Route Name</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700 w-1/5">Capacity</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700 w-1/5">Operational Status</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-center text-gray-700 w-1/5">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredTrains.map((train) => (
+                                            <TableRow
+                                                key={train.train_id}
+                                                className="hover:bg-primary/5 transition-colors border-b border-gray-200"
+                                            >
+                                                <TableCell className="py-4 px-6 text-base font-medium">{train.train_code}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{train.route_name}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{train.capacity}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base">
+                                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${train.operational_status === 'active' ? 'bg-green-100 text-green-800' :
+                                                            train.operational_status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
+                                                                'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                        {train.operational_status.charAt(0).toUpperCase() + train.operational_status.slice(1)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="py-4 px-6">
+                                                    <div className="flex justify-center space-x-3">
+                                                        {/* Edit button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => openEditModal(train)}
+                                                            className="flex items-center h-10 px-4 border-2 hover:bg-gray-100 transition-colors"
+                                                        >
+                                                            <Edit className="h-5 w-5 mr-1" />
+                                                            <span>Edit</span>
+                                                        </Button>
+
+                                                        {/* Delete button */}
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            onClick={() => handleDelete(train.train_id)}
+                                                            className="flex items-center h-10 px-4"
+                                                        >
+                                                            <Trash className="h-5 w-5 mr-1" />
+                                                            <span>Delete</span>
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </div>
                     </div>
 
                     {/* Add Train button */}
-                    <div className="mt-6 text-center">
-                        <Button className="px-4 py-2 bg-primary text-white rounded" onClick={toggleAddModal}>
+                    <div className="mt-8 text-center">
+                        <Button
+                            className="px-8 py-3 text-lg font-semibold bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors shadow-md"
+                            onClick={toggleAddModal}
+                        >
                             Add Train
                         </Button>
 
                         {/* Add Train Modal */}
                         {isAddModalOpen && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={(e) => {
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50" onClick={(e) => {
                                 if (e.target === e.currentTarget) toggleAddModal();
                             }}>
-                                <div className="bg-white p-6 rounded-lg w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-                                    <h2 className="text-primary font-bold text-2xl mb-4">Add New Train</h2>
+                                <div className="bg-white p-8 rounded-lg w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+                                    <h2 className="text-primary font-bold text-2xl mb-6 text-center">Add New Train</h2>
                                     <Form {...addForm}>
                                         <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-6">
                                             {/* Train Code Field */}
@@ -443,11 +466,15 @@ export default function TrainManage() {
                                                 name="train_code"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Train Code</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Train Code</FormLabel>
                                                         <FormControl>
-                                                            <Input type="text" {...field} />
+                                                            <Input
+                                                                type="text"
+                                                                {...field}
+                                                                className="p-3 text-base border-2 rounded-md"
+                                                            />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -458,29 +485,33 @@ export default function TrainManage() {
                                                 name="route_id"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Route</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Route</FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
                                                             defaultValue={field.value}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger>
+                                                                <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                                     <SelectValue placeholder="Select a route" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent>
+                                                            <SelectContent className="max-h-80">
                                                                 {isRoutesLoading ? (
-                                                                    <div className="p-2">Loading routes...</div>
+                                                                    <div className="p-4 text-center">Loading routes...</div>
                                                                 ) : (
                                                                     routes.map((route) => (
-                                                                        <SelectItem key={route.route_id} value={route.route_id}>
+                                                                        <SelectItem
+                                                                            key={route.route_id}
+                                                                            value={route.route_id}
+                                                                            className="text-base py-2"
+                                                                        >
                                                                             {route.route_name}
                                                                         </SelectItem>
                                                                     ))
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -491,7 +522,7 @@ export default function TrainManage() {
                                                 name="capacity"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Capacity</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Capacity</FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
@@ -499,9 +530,10 @@ export default function TrainManage() {
                                                                 step="1"
                                                                 {...field}
                                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                                                className="p-3 text-base border-2 rounded-md"
                                                             />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -512,40 +544,45 @@ export default function TrainManage() {
                                                 name="operational_status"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Operational Status</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Operational Status</FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
                                                             defaultValue={field.value}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger>
+                                                                <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                                     <SelectValue placeholder="Select status" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="active">Active</SelectItem>
-                                                                <SelectItem value="inactive">Inactive</SelectItem>
-                                                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                                                            <SelectContent className="max-h-80">
+                                                                <SelectItem value="active" className="text-base py-2">Active</SelectItem>
+                                                                <SelectItem value="inactive" className="text-base py-2">Inactive</SelectItem>
+                                                                <SelectItem value="maintenance" className="text-base py-2">Maintenance</SelectItem>
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
 
                                             {/* Submit Buttons */}
-                                            <div className="flex justify-between">
+                                            <div className="flex gap-4 pt-4">
                                                 <Button
                                                     variant="outline"
                                                     onClick={toggleAddModal}
                                                     type="button"
+                                                    className="w-1/2 p-3 text-base font-medium border-2 rounded-md"
                                                 >
                                                     Cancel
                                                 </Button>
-                                                <Button type="submit" disabled={isPending}>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isPending}
+                                                    className="w-1/2 p-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md"
+                                                >
                                                     {isPending ? (
                                                         <>
-                                                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                            <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                             Adding...
                                                         </>
                                                     ) : (
@@ -561,11 +598,11 @@ export default function TrainManage() {
 
                         {/* Edit Train Modal */}
                         {isEditModalOpen && currentTrain && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={(e) => {
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50" onClick={(e) => {
                                 if (e.target === e.currentTarget) closeEditModal();
                             }}>
-                                <div className="bg-white p-6 rounded-lg w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-                                    <h2 className="text-primary font-bold text-2xl mb-4">Edit Train</h2>
+                                <div className="bg-white p-8 rounded-lg w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+                                    <h2 className="text-primary font-bold text-2xl mb-6 text-center">Edit Train</h2>
                                     <Form {...editForm}>
                                         <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-6">
                                             {/* Train Code Field */}
@@ -574,11 +611,15 @@ export default function TrainManage() {
                                                 name="train_code"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Train Code</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Train Code</FormLabel>
                                                         <FormControl>
-                                                            <Input type="text" {...field} />
+                                                            <Input
+                                                                type="text"
+                                                                {...field}
+                                                                className="p-3 text-base border-2 rounded-md"
+                                                            />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -589,30 +630,34 @@ export default function TrainManage() {
                                                 name="route_id"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Route</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Route</FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
                                                             defaultValue={field.value}
                                                             value={field.value}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger>
+                                                                <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                                     <SelectValue placeholder="Select a route" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent>
+                                                            <SelectContent className="max-h-80">
                                                                 {isRoutesLoading ? (
-                                                                    <div className="p-2">Loading routes...</div>
+                                                                    <div className="p-4 text-center">Loading routes...</div>
                                                                 ) : (
                                                                     routes.map((route) => (
-                                                                        <SelectItem key={route.route_id} value={route.route_id}>
+                                                                        <SelectItem
+                                                                            key={route.route_id}
+                                                                            value={route.route_id}
+                                                                            className="text-base py-2"
+                                                                        >
                                                                             {route.route_name}
                                                                         </SelectItem>
                                                                     ))
                                                                 )}
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -623,7 +668,7 @@ export default function TrainManage() {
                                                 name="capacity"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Capacity</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Capacity</FormLabel>
                                                         <FormControl>
                                                             <Input
                                                                 type="number"
@@ -631,9 +676,10 @@ export default function TrainManage() {
                                                                 step="1"
                                                                 {...field}
                                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                                                className="p-3 text-base border-2 rounded-md"
                                                             />
                                                         </FormControl>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
@@ -644,40 +690,45 @@ export default function TrainManage() {
                                                 name="operational_status"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Operational Status</FormLabel>
+                                                        <FormLabel className="text-lg font-medium">Operational Status</FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
                                                             defaultValue={field.value}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger>
+                                                                <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                                     <SelectValue placeholder="Select status" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="active">Active</SelectItem>
-                                                                <SelectItem value="inactive">Inactive</SelectItem>
-                                                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                                                            <SelectContent className="max-h-80">
+                                                                <SelectItem value="active" className="text-base py-2">Active</SelectItem>
+                                                                <SelectItem value="inactive" className="text-base py-2">Inactive</SelectItem>
+                                                                <SelectItem value="maintenance" className="text-base py-2">Maintenance</SelectItem>
                                                             </SelectContent>
                                                         </Select>
-                                                        <FormMessage />
+                                                        <FormMessage className="text-sm font-medium" />
                                                     </FormItem>
                                                 )}
                                             />
 
                                             {/* Submit Buttons */}
-                                            <div className="flex justify-between">
+                                            <div className="flex gap-4 pt-4">
                                                 <Button
                                                     variant="outline"
                                                     onClick={closeEditModal}
                                                     type="button"
+                                                    className="w-1/2 p-3 text-base font-medium border-2 rounded-md"
                                                 >
                                                     Cancel
                                                 </Button>
-                                                <Button type="submit" disabled={isPending}>
+                                                <Button
+                                                    type="submit"
+                                                    disabled={isPending}
+                                                    className="w-1/2 p-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md"
+                                                >
                                                     {isPending ? (
                                                         <>
-                                                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                            <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                             Updating...
                                                         </>
                                                     ) : (
@@ -697,17 +748,35 @@ export default function TrainManage() {
     )
 }
 
-function SearchIcon(props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>) {
+// Train Icon Component
+function TrainIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
         <svg
             {...props}
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <rect x="4" y="4" width="16" height="12" rx="2" />
+            <path d="M4 16h16" />
+            <path d="M8 16v4" />
+            <path d="M16 16v4" />
+            <path d="M10 9h4" />
+        </svg>
+    )
+}
+
+function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
         >

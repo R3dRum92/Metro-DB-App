@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Users, Train, MapPin, Route, AlertTriangle } from "lucide-react"
+import { Loader2, Users, Train, MapPin, Route, AlertTriangle, User, Building, CreditCard, Settings } from "lucide-react"
 import UserDemographics from "@/components/ui/userDemographics" // Import the user demographics component
 import RouteGrouping from "@/components/ui/RouteGrouping"// Import the new component
 
@@ -160,10 +160,10 @@ export default function Dashboard() {
     return (
         <div className="flex flex-col h-screen">
             {/* Full-width header */}
-            <Card className="w-full border-primary/20 mb-6">
-                <CardHeader className="bg-primary/10">
-                    <CardTitle className="text-3xl font-bold text-center text-primary">Admin Dashboard</CardTitle>
-                    <CardDescription className="text-center text-lg text-muted-foreground">Welcome to the Metro Admin Dashboard</CardDescription>
+            <Card className="w-full border-primary/20 mb-6 shadow-md">
+                <CardHeader className="bg-primary text-white">
+                    <CardTitle className="text-3xl font-bold text-center">Metro Transit Admin Dashboard</CardTitle>
+                    <CardDescription className="text-center text-lg text-primary-100">Manage and monitor your transit system efficiently</CardDescription>
                 </CardHeader>
             </Card>
 
@@ -179,17 +179,18 @@ export default function Dashboard() {
                             <nav>
                                 <ul className="space-y-2">
                                     {[
-                                        { href: "/protected/user-manage", label: "User Management" },
-                                        { href: "/protected/station-manage", label: "Station Management" },
-                                        { href: "/protected/train-manage", label: "Train Management" },
-                                        { href: "/protected/route-manage", label: "Route Management" },
-                                        { href: "/protected/ticket-manage", label: "Ticketing & Pricing" },
+                                        { href: "/protected/user-manage", label: "User Management", icon: <User className="h-5 w-5" /> },
+                                        { href: "/protected/station-manage", label: "Station Management", icon: <Building className="h-5 w-5" /> },
+                                        { href: "/protected/train-manage", label: "Train Management", icon: <Train className="h-5 w-5" /> },
+                                        { href: "/protected/route-manage", label: "Route Management", icon: <Route className="h-5 w-5" /> },
+                                        { href: "/protected/ticket-manage", label: "Ticketing & Pricing", icon: <CreditCard className="h-5 w-5" /> },
                                     ].map((item, index) => (
                                         <li key={index} className="border-b border-primary/10">
                                             <Link
                                                 href={item.href}
-                                                className="block w-full text-foreground px-4 py-3 rounded-md hover:bg-primary/10 transition-colors"
+                                                className="flex items-center w-full text-foreground px-4 py-3 rounded-md hover:bg-primary/10 transition-colors"
                                             >
+                                                <div className="text-primary mr-3">{item.icon}</div>
                                                 {item.label}
                                             </Link>
                                         </li>
@@ -244,7 +245,9 @@ export default function Dashboard() {
                                     <div className="grid grid-cols-2 gap-6 mb-6">
                                         {/* Displaying first 5 rows of the Station table */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2">Stations</h3>
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
+                                                Stations
+                                            </h3>
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow className="bg-primary/5">
@@ -262,13 +265,19 @@ export default function Dashboard() {
                                                 </TableBody>
                                             </Table>
                                             <div className="flex justify-center mt-4">
-                                                <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
+                                                <Link href="/protected/station-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                                                    <Settings className="h-4 w-4 mr-2" />
+                                                    Manage Stations
+                                                </Link>
                                             </div>
                                         </div>
 
                                         {/* Displaying first 5 rows of the Train table */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2">Trains</h3>
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
+
+                                                Trains
+                                            </h3>
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow className="bg-primary/5">
@@ -279,11 +288,11 @@ export default function Dashboard() {
                                                 </TableHeader>
                                                 <TableBody>
                                                     {trains.slice(0, 5).map((train, index) => (
-                                                        <TableRow key={index}>
+                                                        <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                                                             <TableCell className="text-center">{train.train_code}</TableCell>
                                                             <TableCell className="text-center">{train.route_name}</TableCell>
                                                             <TableCell className="text-center">
-                                                                <span className={`px-2 py-1 rounded-full text-s font-medium ${train.operational_status === 'active'
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${train.operational_status === 'active'
                                                                     ? 'bg-green-100 text-green-800'
                                                                     : 'bg-red-100 text-red-800'
                                                                     }`}>
@@ -295,13 +304,19 @@ export default function Dashboard() {
                                                 </TableBody>
                                             </Table>
                                             <div className="flex justify-center mt-4">
-                                                <Link href="/protected/train-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Trains</Link>
+                                                <Link href="/protected/train-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                                                    <Settings className="h-4 w-4 mr-2" />
+                                                    Manage Trains
+                                                </Link>
                                             </div>
                                         </div>
 
                                         {/* Displaying first 5 rows of the Route table */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2">Routes</h3>
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
+
+                                                Routes
+                                            </h3>
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow className="bg-primary/5">
@@ -312,7 +327,7 @@ export default function Dashboard() {
                                                 </TableHeader>
                                                 <TableBody>
                                                     {routes.slice(0, 5).map((route, index) => (
-                                                        <TableRow key={index}>
+                                                        <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                                                             <TableCell className="text-center">{route.route_name}</TableCell>
                                                             <TableCell className="text-center">{route.start_station_name}</TableCell>
                                                             <TableCell className="text-center">{route.end_station_name}</TableCell>
@@ -321,7 +336,10 @@ export default function Dashboard() {
                                                 </TableBody>
                                             </Table>
                                             <div className="flex justify-center mt-4">
-                                                <Link href="/protected/route-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors text-center">Manage Routes</Link>
+                                                <Link href="/protected/route-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                                                    <Settings className="h-4 w-4 mr-2" />
+                                                    Manage Routes
+                                                </Link>
                                             </div>
                                         </div>
 

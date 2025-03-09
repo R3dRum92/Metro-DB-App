@@ -210,6 +210,7 @@ export default function EditRoute() {
     const [message, setMessage] = useState({ type: "", content: "" })
     const [stopModal, setStopModal] = useState<boolean>(false)
 
+
     // Form setup
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -396,87 +397,93 @@ export default function EditRoute() {
 
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
+        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
+            <Card className="w-full max-w-6xl shadow-lg">
+                <CardHeader className="bg-primary/5 rounded-t-lg py-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <RouteIcon className="text-primary" size={24} strokeWidth={3.5} />
-                            <CardTitle className="text-primary text-2xl font-bold">Route Details</CardTitle>
+                        <div className="flex items-center gap-3">
+                            <RouteIcon className="text-primary" size={32} strokeWidth={3} />
+                            <CardTitle className="text-primary text-3xl font-bold">Route Details</CardTitle>
                         </div>
                         <Link href="/protected/route-manage">
-                            <Button variant="outline">Back to Routes</Button>
+                            <Button variant="outline" className="text-base px-6 py-2 border-2 hover:bg-gray-100 transition-colors">
+                                Back to Routes
+                            </Button>
                         </Link>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-8">
                     {isLoading ? (
-                        <div className="flex justify-center py-8">
-                            <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                        <div className="flex justify-center py-12">
+                            <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
                         </div>
                     ) : route ? (
                         <>
                             {message.content && (
-                                <div className={`mb-4 p-3 rounded ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                <div className={`mb-6 p-4 rounded-lg text-base ${message.type === "success" ? "bg-green-100 text-green-800 border border-green-300" : "bg-red-100 text-red-800 border border-red-300"}`}>
                                     {message.content}
                                 </div>
                             )}
 
                             {/* Route Information Section */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">Route Information</h3>
-                                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                            <div className="mb-10">
+                                <h3 className="text-xl font-semibold mb-5 text-gray-800 border-b pb-2">Route Information</h3>
+                                <div className="grid grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
                                     <div>
-                                        <p className="text-sm text-gray-500">Route ID</p>
-                                        <p className="font-medium">{route.route_id}</p>
+                                        <p className="text-base text-gray-500 mb-1">Route ID</p>
+                                        <p className="font-medium text-lg">{route.route_id}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Route Name</p>
-                                        <p className="font-medium">{route.route_name}</p>
+                                        <p className="text-base text-gray-500 mb-1">Route Name</p>
+                                        <p className="font-medium text-lg">{route.route_name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Start Station</p>
-                                        <p className="font-medium">{route.start_station_name}</p>
+                                        <p className="text-base text-gray-500 mb-1">Start Station</p>
+                                        <p className="font-medium text-lg">{route.start_station_name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">End Station</p>
-                                        <p className="font-medium">{route.end_station_name}</p>
+                                        <p className="text-base text-gray-500 mb-1">End Station</p>
+                                        <p className="font-medium text-lg">{route.end_station_name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Total Stations</p>
-                                        <p className="font-medium">{route.stops ? route.stops.length : 0}</p>
+                                        <p className="text-base text-gray-500 mb-1">Total Stations</p>
+                                        <p className="font-medium text-lg">{route.stops ? route.stops.length : 0}</p>
                                     </div>
                                 </div>
                             </div>
 
-
                             {/* Stops Table Section */}
-                            {/*new one*/}
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-medium">Route Stops</h3>
-                                    <Button size="sm" variant="outline" onClick={toggleStopModal}>
+                            <div className="mb-10">
+                                <div className="flex items-center justify-between mb-5">
+                                    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Route Stops</h3>
+                                    <Button
+                                        size="default"
+                                        variant="outline"
+                                        onClick={toggleStopModal}
+                                        className="px-6 py-2 text-base font-medium border-2 hover:bg-primary/5 transition-colors"
+                                    >
                                         Add Stop
                                     </Button>
                                 </div>
 
                                 {stopModal && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setStopModal(false)}>
-                                        <div className="bg-white rounded-md p-6 w-[400px] max-w-md" onClick={(e) => e.stopPropagation()}>
-                                            <h2 className="text-primary font-bold text-2xl mb-4">Add Stop</h2>
+                                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setStopModal(false)}>
+                                        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                                            <h2 className="text-primary font-bold text-2xl mb-6 text-center">Add Stop</h2>
 
                                             <Form {...form}>
-                                                <form onSubmit={stopForm.handleSubmit(onAddStop)} className="space-y-4">
+                                                <form onSubmit={stopForm.handleSubmit(onAddStop)} className="space-y-5">
                                                     <FormField
                                                         control={stopForm.control}
                                                         name="stop_int"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <FormLabel>Stop No.</FormLabel>
+                                                                <FormLabel className="text-lg font-medium">Stop No.</FormLabel>
                                                                 <FormControl>
                                                                     <Input
                                                                         type="number"
                                                                         placeholder="Enter stop number"
+                                                                        className="p-3 text-base border-2 rounded-md"
                                                                         {...field}
                                                                         onChange={(e) => {
                                                                             // Only allow integer values
@@ -487,7 +494,7 @@ export default function EditRoute() {
                                                                         }}
                                                                     />
                                                                 </FormControl>
-                                                                <FormMessage />
+                                                                <FormMessage className="text-sm font-medium" />
                                                             </FormItem>
                                                         )}
                                                     />
@@ -497,48 +504,53 @@ export default function EditRoute() {
                                                         name="station_id"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <FormLabel>Station</FormLabel>
+                                                                <FormLabel className="text-lg font-medium">Station</FormLabel>
                                                                 <Select
                                                                     onValueChange={field.onChange}
                                                                     defaultValue={field.value}
                                                                     value={field.value}
                                                                 >
-                                                                    <SelectTrigger className="w-full">
+                                                                    <SelectTrigger className="w-full p-3 text-base border-2 rounded-md">
                                                                         <SelectValue placeholder="Select a station" />
                                                                     </SelectTrigger>
-                                                                    <SelectContent>
+                                                                    <SelectContent className="max-h-80">
                                                                         {isLoading ? (
-                                                                            <div className="p-2">Loading...</div>
+                                                                            <div className="p-4 text-center">Loading stations...</div>
                                                                         ) : (
                                                                             stations.map((station) => (
-                                                                                <SelectItem key={station.station_id} value={station.station_id}>
+                                                                                <SelectItem
+                                                                                    key={station.station_id}
+                                                                                    value={station.station_id}
+                                                                                    className="text-base py-2"
+                                                                                >
                                                                                     {station.name}
                                                                                 </SelectItem>
                                                                             ))
                                                                         )}
                                                                     </SelectContent>
                                                                 </Select>
-                                                                <FormMessage />
+                                                                <FormMessage className="text-sm font-medium" />
                                                             </FormItem>
                                                         )}
                                                     />
 
-                                                    <div className="flex justify-between pt-4">
+                                                    <div className="flex gap-4 pt-4">
                                                         <Button
                                                             type="button"
                                                             variant="outline"
+                                                            className="w-1/2 p-3 text-base font-medium border-2 rounded-md"
                                                             onClick={toggleStopModal}
                                                         >
                                                             Cancel
                                                         </Button>
                                                         <Button
                                                             type="submit"
-                                                            className="bg-primary text-white"
+                                                            className="w-1/2 p-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md"
                                                             disabled={isPending}
                                                         >
                                                             {isPending ? (
                                                                 <>
-                                                                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                                    <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                                     Adding...
                                                                 </>
                                                             ) : (
@@ -553,43 +565,45 @@ export default function EditRoute() {
                                 )}
 
                                 {route.stops && route.stops.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableCaption>A list of metro routes and their details</TableCaption>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Stop No.</TableHead>
-                                                    <TableHead>Station</TableHead>
-                                                    <TableHead>Location</TableHead>
-                                                    <TableHead className="text-center">Actions</TableHead>
+                                    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+                                        <Table className="w-full">
+                                            <TableCaption className="text-lg font-medium py-4">A list of stops for this route</TableCaption>
+                                            <TableHeader className="bg-gray-50">
+                                                <TableRow className="border-b-2 border-gray-200">
+                                                    <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Stop No.</TableHead>
+                                                    <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Station</TableHead>
+                                                    <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Location</TableHead>
+                                                    <TableHead className="py-4 px-6 text-lg font-bold text-center text-gray-700">Actions</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {route.stops.map((stop) => (
                                                     <TableRow
                                                         key={stop.route_id || `${stop.station_id}-${stop.stop_int}`}
-                                                        className="hover:bg-gray-100"
+                                                        className="hover:bg-primary/5 transition-colors border-b border-gray-200"
                                                     >
-                                                        <TableCell>{stop.stop_int}</TableCell>
-                                                        <TableCell>{stop.station_name}</TableCell>
-                                                        <TableCell>{stop.station_location || stop.station_location}</TableCell>
-                                                        <TableCell>
-                                                            <div className="flex items-center justify-center space-x-2">
+                                                        <TableCell className="py-4 px-6 text-base font-medium">{stop.stop_int}</TableCell>
+                                                        <TableCell className="py-4 px-6 text-base">{stop.station_name}</TableCell>
+                                                        <TableCell className="py-4 px-6 text-base">{stop.station_location || "Unknown"}</TableCell>
+                                                        <TableCell className="py-4 px-6">
+                                                            <div className="flex items-center justify-center space-x-3">
                                                                 <Button
                                                                     size="sm"
                                                                     variant="outline"
-                                                                    className="h-8 px-2"
+                                                                    className="h-10 px-4 border-2 hover:bg-gray-100 transition-colors"
                                                                     onClick={() => handleEditStop(stop)}
                                                                 >
-                                                                    <Pencil className="h-4 w-4" />
+                                                                    <Pencil className="h-5 w-5 mr-1" />
+                                                                    <span>Edit</span>
                                                                 </Button>
                                                                 <Button
                                                                     size="sm"
                                                                     variant="destructive"
-                                                                    className="h-8 px-2"
+                                                                    className="h-10 px-4"
                                                                     onClick={() => handleDeleteStop(stop.station_id.toString(), stop.stop_int.toString())}
                                                                 >
-                                                                    <Trash className="h-4 w-4" />
+                                                                    <Trash className="h-5 w-5 mr-1" />
+                                                                    <span>Delete</span>
                                                                 </Button>
                                                             </div>
                                                         </TableCell>
@@ -599,9 +613,14 @@ export default function EditRoute() {
                                         </Table>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-4 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">No stops have been added to this route</p>
-                                        <Button variant="outline" size="sm" className="mt-2" onClick={toggleStopModal}>
+                                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                                        <p className="text-gray-600 text-lg mb-3">No stops have been added to this route</p>
+                                        <Button
+                                            variant="outline"
+                                            size="default"
+                                            className="mt-2 px-6 py-2 text-base font-medium border-2"
+                                            onClick={toggleStopModal}
+                                        >
                                             Add Stops
                                         </Button>
                                     </div>
@@ -610,14 +629,14 @@ export default function EditRoute() {
 
                             {editStopModal && (
                                 <div
-                                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
                                     onClick={() => setEditStopModal(false)}
                                 >
                                     <div
-                                        className="bg-white rounded-md p-6 w-[400px] max-w-md"
+                                        className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <h2 className="text-primary font-bold text-2xl mb-4">Edit Stop</h2>
+                                        <h2 className="text-primary font-bold text-2xl mb-6 text-center">Edit Stop</h2>
 
                                         <Form {...stopForm}>
                                             <form onSubmit={stopForm.handleSubmit((values) => {
@@ -640,24 +659,23 @@ export default function EditRoute() {
                                                         setMessage({ type: "error", content: result?.message || "Failed to update stop" });
                                                     }
                                                 });
-                                            })} className="space-y-4">
-                                                {/* Same fields as in addStop form */}
+                                            })} className="space-y-5">
                                                 <FormField
                                                     control={stopForm.control}
                                                     name="stop_int"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Stop No. (cannot be changed)</FormLabel>
+                                                            <FormLabel className="text-lg font-medium">Stop No. (cannot be changed)</FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     type="number"
                                                                     placeholder="Enter stop number"
+                                                                    className="p-3 text-base border-2 rounded-md bg-gray-100"
                                                                     {...field}
-                                                                    disabled={true} // Disable the input
-                                                                    className="bg-gray-100" // Optional: add a visual indicator that it's disabled
+                                                                    disabled={true}
                                                                 />
                                                             </FormControl>
-                                                            <FormMessage />
+                                                            <FormMessage className="text-sm font-medium" />
                                                         </FormItem>
                                                     )}
                                                 />
@@ -667,44 +685,49 @@ export default function EditRoute() {
                                                     name="station_id"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Station</FormLabel>
+                                                            <FormLabel className="text-lg font-medium">Station</FormLabel>
                                                             <Select
                                                                 onValueChange={field.onChange}
                                                                 defaultValue={field.value}
                                                                 value={field.value}
                                                             >
-                                                                <SelectTrigger className="w-full">
+                                                                <SelectTrigger className="w-full p-3 text-base border-2 rounded-md">
                                                                     <SelectValue placeholder="Select a station" />
                                                                 </SelectTrigger>
-                                                                <SelectContent>
+                                                                <SelectContent className="max-h-80">
                                                                     {stations.map((station) => (
-                                                                        <SelectItem key={station.station_id} value={station.station_id}>
+                                                                        <SelectItem
+                                                                            key={station.station_id}
+                                                                            value={station.station_id}
+                                                                            className="text-base py-2"
+                                                                        >
                                                                             {station.name}
                                                                         </SelectItem>
                                                                     ))}
                                                                 </SelectContent>
                                                             </Select>
-                                                            <FormMessage />
+                                                            <FormMessage className="text-sm font-medium" />
                                                         </FormItem>
                                                     )}
                                                 />
 
-                                                <div className="flex justify-between pt-4">
+                                                <div className="flex gap-4 pt-4">
                                                     <Button
                                                         type="button"
                                                         variant="outline"
+                                                        className="w-1/2 p-3 text-base font-medium border-2 rounded-md"
                                                         onClick={() => setEditStopModal(false)}
                                                     >
                                                         Cancel
                                                     </Button>
                                                     <Button
                                                         type="submit"
-                                                        className="bg-primary text-white"
+                                                        className="w-1/2 p-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md"
                                                         disabled={isPending}
                                                     >
                                                         {isPending ? (
                                                             <>
-                                                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                                <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                                 Updating...
                                                             </>
                                                         ) : (
@@ -718,11 +741,9 @@ export default function EditRoute() {
                                 </div>
                             )}
 
-
-
                             {/* Edit Form Section */}
-                            <div className="pt-6 border-t">
-                                <h3 className="text-lg font-medium mb-4">Edit Route</h3>
+                            <div className="pt-8 border-t border-gray-200">
+                                <h3 className="text-xl font-semibold mb-6 text-gray-800">Edit Route</h3>
                                 <Form {...stopForm}>
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                         <FormField
@@ -730,11 +751,15 @@ export default function EditRoute() {
                                             name="route_name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Route Name</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Route Name</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} defaultValue={route.route_name} />
+                                                        <Input
+                                                            {...field}
+                                                            defaultValue={route.route_name}
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -744,24 +769,28 @@ export default function EditRoute() {
                                             name="start_station_id"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Start Station</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Start Station</FormLabel>
                                                     <Select
                                                         onValueChange={field.onChange}
                                                         defaultValue={String(route.start_station_id)}
                                                         value={field.value}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                             <SelectValue placeholder="Select start station" />
                                                         </SelectTrigger>
-                                                        <SelectContent>
+                                                        <SelectContent className="max-h-80">
                                                             {stations.map((station) => (
-                                                                <SelectItem key={station.station_id} value={station.station_id}>
+                                                                <SelectItem
+                                                                    key={station.station_id}
+                                                                    value={station.station_id}
+                                                                    className="text-base py-2"
+                                                                >
                                                                     {station.name}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -771,33 +800,41 @@ export default function EditRoute() {
                                             name="end_station_id"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>End Station</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">End Station</FormLabel>
                                                     <Select
                                                         onValueChange={field.onChange}
                                                         defaultValue={String(route.end_station_id)}
                                                         value={field.value}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="p-3 text-base border-2 rounded-md">
                                                             <SelectValue placeholder="Select end station" />
                                                         </SelectTrigger>
-                                                        <SelectContent>
+                                                        <SelectContent className="max-h-80">
                                                             {stations.map((station) => (
-                                                                <SelectItem key={station.station_id} value={station.station_id}>
+                                                                <SelectItem
+                                                                    key={station.station_id}
+                                                                    value={station.station_id}
+                                                                    className="text-base py-2"
+                                                                >
                                                                     {station.name}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
 
-                                        <div className="flex justify-between">
-                                            <Button type="submit" disabled={isUpdating}>
+                                        <div className="flex justify-between pt-4">
+                                            <Button
+                                                type="submit"
+                                                disabled={isUpdating}
+                                                className="px-8 py-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md shadow-md"
+                                            >
                                                 {isUpdating ? (
                                                     <>
-                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                         Updating...
                                                     </>
                                                 ) : (
@@ -810,10 +847,11 @@ export default function EditRoute() {
                                                 variant="destructive"
                                                 onClick={handleDelete}
                                                 disabled={isDeleting}
+                                                className="px-8 py-3 text-base font-medium shadow-md"
                                             >
                                                 {isDeleting ? (
                                                     <>
-                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                         Deleting...
                                                     </>
                                                 ) : (
@@ -826,10 +864,15 @@ export default function EditRoute() {
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8">
-                            <p className="text-gray-600">Route not found</p>
+                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-gray-600 text-xl mb-4">Route not found</p>
                             <Link href="/protected/route-manage">
-                                <Button variant="outline" className="mt-4">Back to Routes</Button>
+                                <Button
+                                    variant="outline"
+                                    className="mt-4 px-6 py-2 text-base font-medium border-2 hover:bg-gray-100 transition-colors"
+                                >
+                                    Back to Routes
+                                </Button>
                             </Link>
                         </div>
                     )}

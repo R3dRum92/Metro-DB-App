@@ -87,7 +87,7 @@ const UserDemographics: React.FC = () => {
 
     return (
         <Card className="w-full bg-card rounded-lg border border-primary/20">
-            <CardHeader className="bg-primary/10">
+            <CardHeader >
                 <CardTitle className="text-lg font-semibold text-center text-primary">User Age Demographics</CardTitle>
             </CardHeader>
             <CardContent className="p-4">

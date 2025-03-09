@@ -195,66 +195,67 @@ export default function EditUser() {
     };
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
+        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
+            <Card className="w-full max-w-6xl shadow-lg">
+                <CardHeader className="bg-primary/5 rounded-t-lg py-6">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <User className="text-primary" size={24} strokeWidth={3.5} />
-                            <CardTitle className="text-primary text-2xl font-bold"
-                            >User Details</CardTitle>
+                        <div className="flex items-center gap-3">
+                            <User className="text-primary" width={32} height={32} strokeWidth="3" />
+                            <CardTitle className="text-primary text-3xl font-bold">User Details</CardTitle>
                         </div>
                         <Link href="/protected/user-manage">
-                            <Button variant="outline">Back to Users</Button>
+                            <Button variant="outline" className="text-base px-6 py-2 border-2 hover:bg-gray-100 transition-colors">
+                                Back to Users
+                            </Button>
                         </Link>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-8">
                     {isLoading ? (
-                        <div className="flex justify-center py-8">
-                            <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
+                        <div className="flex justify-center py-12">
+                            <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
                         </div>
                     ) : user ? (
                         <>
                             {message.content && (
-                                <div className={`mb-4 p-3 rounded ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                <div className={`mb-6 p-4 rounded-lg text-base ${message.type === "success" ? "bg-green-100 text-green-800 border border-green-300" : "bg-red-100 text-red-800 border border-red-300"}`}>
                                     {message.content}
                                 </div>
                             )}
 
                             {/* User Information Section */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-medium mb-4">User Information</h3>
-                                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                            <div className="mb-10">
+                                <h3 className="text-xl font-semibold mb-5 text-gray-800 border-b pb-2">User Information</h3>
+                                <div className="grid grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-100">
                                     <div>
-                                        <p className="text-sm text-gray-500">User ID</p>
-                                        <p className="font-medium">{user.id}</p>
+                                        <p className="text-base text-gray-500 mb-1">User ID</p>
+                                        <p className="font-medium text-lg">{user.id}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Name</p>
-                                        <p className="font-medium">{user.name}</p>
+                                        <p className="text-base text-gray-500 mb-1">Name</p>
+                                        <p className="font-medium text-lg">{user.name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Email</p>
-                                        <p className="font-medium">{user.email}</p>
+                                        <p className="text-base text-gray-500 mb-1">Email</p>
+                                        <p className="font-medium text-lg">{user.email}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Phone</p>
-                                        <p className="font-medium">{user.phone}</p>
+                                        <p className="text-base text-gray-500 mb-1">Phone</p>
+                                        <p className="font-medium text-lg">{user.phone}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">Wallet Balance</p>
-                                        <p className="font-medium">৳{user.wallet.toFixed(2)}</p>
+                                        <p className="text-base text-gray-500 mb-1">Wallet Balance</p>
+                                        <p className="font-medium text-lg">৳{user.wallet.toFixed(2)}</p>
                                     </div>
                                     {user.dateOfBirth && (
                                         <>
                                             <div>
-                                                <p className="text-sm text-gray-500">Date of Birth</p>
-                                                <p className="font-medium">{new Date(user.dateOfBirth).toLocaleDateString()}</p>
+                                                <p className="text-base text-gray-500 mb-1">Date of Birth</p>
+                                                <p className="font-medium text-lg">{new Date(user.dateOfBirth).toLocaleDateString()}</p>
                                             </div>
                                             <div>
-                                                <p className="text-sm text-gray-500">Age</p>
-                                                <p className="font-medium">{calculateAge(user.dateOfBirth)} years</p>
+                                                <p className="text-base text-gray-500 mb-1">Age</p>
+                                                <p className="font-medium text-lg">{calculateAge(user.dateOfBirth)} years</p>
                                             </div>
                                         </>
                                     )}
@@ -262,8 +263,8 @@ export default function EditUser() {
                             </div>
 
                             {/* Edit Form Section */}
-                            <div className="pt-6 border-t">
-                                <h3 className="text-lg font-medium mb-4">Edit User</h3>
+                            <div className="pt-8 border-t border-gray-200">
+                                <h3 className="text-xl font-semibold mb-6 text-gray-800">Edit User</h3>
                                 <Form {...form}>
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                         <FormField
@@ -271,11 +272,14 @@ export default function EditUser() {
                                             name="name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Name</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Name</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} />
+                                                        <Input
+                                                            {...field}
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -285,11 +289,15 @@ export default function EditUser() {
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Email</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Email</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} type="email" />
+                                                        <Input
+                                                            {...field}
+                                                            type="email"
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -299,11 +307,14 @@ export default function EditUser() {
                                             name="phone"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Phone</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Phone</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} />
+                                                        <Input
+                                                            {...field}
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -313,11 +324,15 @@ export default function EditUser() {
                                             name="dateOfBirth"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Date of Birth</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Date of Birth</FormLabel>
                                                     <FormControl>
-                                                        <Input type="date" {...field} />
+                                                        <Input
+                                                            type="date"
+                                                            {...field}
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
@@ -327,20 +342,29 @@ export default function EditUser() {
                                             name="wallet"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Wallet Balance</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">Wallet Balance</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} type="number" step="0.01" />
+                                                        <Input
+                                                            {...field}
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="p-3 text-base border-2 rounded-md"
+                                                        />
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-sm font-medium" />
                                                 </FormItem>
                                             )}
                                         />
 
-                                        <div className="flex justify-between">
-                                            <Button type="submit" disabled={isUpdating || isDeleting}>
+                                        <div className="flex justify-between pt-4">
+                                            <Button
+                                                type="submit"
+                                                disabled={isUpdating || isDeleting}
+                                                className="px-8 py-3 text-base font-medium bg-primary hover:bg-primary/90 text-white rounded-md shadow-md"
+                                            >
                                                 {isUpdating ? (
                                                     <>
-                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                         Updating...
                                                     </>
                                                 ) : (
@@ -353,10 +377,11 @@ export default function EditUser() {
                                                 variant="destructive"
                                                 onClick={handleDelete}
                                                 disabled={isUpdating || isDeleting}
+                                                className="px-8 py-3 text-base font-medium shadow-md"
                                             >
                                                 {isDeleting ? (
                                                     <>
-                                                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                                                        <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
                                                         Deleting...
                                                     </>
                                                 ) : (
@@ -369,10 +394,15 @@ export default function EditUser() {
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8">
-                            <p className="text-gray-600">User not found</p>
+                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-gray-600 text-xl mb-4">User not found</p>
                             <Link href="/protected/user-manage">
-                                <Button variant="outline" className="mt-4">Back to Users</Button>
+                                <Button
+                                    variant="outline"
+                                    className="mt-4 px-6 py-2 text-base font-medium border-2 hover:bg-gray-100 transition-colors"
+                                >
+                                    Back to Users
+                                </Button>
                             </Link>
                         </div>
                     )}
