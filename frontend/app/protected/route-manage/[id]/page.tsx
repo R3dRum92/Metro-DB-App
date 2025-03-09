@@ -442,6 +442,10 @@ export default function EditRoute() {
                                         <p className="text-sm text-gray-500">End Station</p>
                                         <p className="font-medium">{route.end_station_name}</p>
                                     </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Total Stations</p>
+                                        <p className="font-medium">{route.stops ? route.stops.length : 0}</p>
+                                    </div>
                                 </div>
                             </div>
 

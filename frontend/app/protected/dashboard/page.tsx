@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Loader2, Users, Train, MapPin, Route, AlertTriangle } from "lucide-react"
+import UserDemographics from "@/components/ui/userDemographics" // Import the user demographics component
+import RouteGrouping from "@/components/ui/RouteGrouping"// Import the new component
 
 interface Station {
     station_id: string;
@@ -238,6 +240,7 @@ export default function Dashboard() {
                                         />
                                     </div>
 
+                                    {/* Tables section */}
                                     <div className="grid grid-cols-2 gap-6 mb-6">
                                         {/* Displaying first 5 rows of the Station table */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
@@ -262,7 +265,6 @@ export default function Dashboard() {
                                                 <Link href="/protected/station-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">Manage Stations</Link>
                                             </div>
                                         </div>
-
 
                                         {/* Displaying first 5 rows of the Train table */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
@@ -322,7 +324,17 @@ export default function Dashboard() {
                                                 <Link href="/protected/route-manage" className="text-muted-foreground px-4 py-2 rounded-md hover:bg-primary/10 transition-colors text-center">Manage Routes</Link>
                                             </div>
                                         </div>
+
+                                        {/* User Demographics Chart */}
+                                        <UserDemographics />
+
+                                        {/* Route Grouping Component - spans full width */}
+                                        <div className="col-span-2">
+                                            <RouteGrouping />
+                                        </div>
                                     </div>
+
+                                    {/* Additional analytics section could be added here in the future */}
                                 </>
                             )}
                         </CardContent>

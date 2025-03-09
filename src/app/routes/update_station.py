@@ -1,3 +1,5 @@
+from typing import Optional
+
 from app.routes.common_imports import *
 
 router = APIRouter()
@@ -7,6 +9,9 @@ class UpdateStationRequest(BaseModel):
     name: str
     location: str
     status: str
+    is_hub: bool
+    primary_route_id: Optional[uuid.UUID] = None
+    secondary_route_id: Optional[uuid.UUID] = None
 
 
 @router.put("/update_station/{station_id}")
@@ -82,6 +87,23 @@ async def update_station(station_update: UpdateStationRequest, station_id: uuid.
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"Failed to update route: {station_update.name}",
+                    )
+
+            if station_update.is_hub:
+                try:
+                    await conn.execute(
+                        """
+                        INSERT INTO hubs VALUES($1, $2, $3)
+                        """,
+                        station_id,
+                        station_update.primary_route_id,
+                        station_update.secondary_route_id,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to create hub: {str(e)}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Failed to create hub: {station_update.name}",
                     )
             await conn.close()
             return {"message": f"Successfully updated station: {station_update.name}"}

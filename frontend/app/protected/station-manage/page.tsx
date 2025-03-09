@@ -19,7 +19,10 @@ import { Trash, Edit } from "lucide-react"
 const formSchema = z.object({
     name: z.string().max(100, "Station Name must be a less than 100 characters"),
     location: z.string().max(255, "Location must be less than 255 characters"),
-    status: z.enum(["active", "inactive", "maintenance", "construction", "planned"])
+    status: z.enum(["active", "inactive", "maintenance", "construction", "planned"]),
+    is_hub: z.boolean().default(false),
+    primary_route_id: z.string().optional(),
+    secondary_route_id: z.string().optional()
 })
 
 interface Station {
@@ -27,12 +30,22 @@ interface Station {
     name: string
     location: string
     status: string
+    is_hub?: boolean
+    primary_route_id?: string
+    secondary_route_id?: string
 }
 
 export type stationActionResult = {
     success?: boolean
     message?: string
     errors?: Record<string, string[]>
+}
+
+interface Route {
+    route_id: string
+    route_name: string
+    start_station_name: string
+    end_station_name: string
 }
 
 type Filters = "active" | "inactive" | "maintenance" | "construction" | "planned" | "none"
@@ -94,14 +107,17 @@ export async function updateStation(formData: FormData, stationId: number): Prom
     const validatedFields = formSchema.safeParse({
         name: formData.get("name"),
         location: formData.get("location"),
-        status: formData.get("status")
+        status: formData.get("status"),
+        is_hub: formData.get("is_hub") === "true",
+        primary_route_id: formData.get("is_hub") === "true" ? formData.get("primary_route_id") : undefined,
+        secondary_route_id: formData.get("is_hub") === "true" ? formData.get("secondary_route_id") : undefined
     })
 
     if (!validatedFields.success) {
         return { errors: validatedFields.error.flatten().fieldErrors }
     }
 
-    const { name, location, status } = validatedFields.data
+    const { name, location, status, is_hub, primary_route_id, secondary_route_id } = validatedFields.data
 
     try {
         const response = await fetch(`http://localhost:8000/update_station/${stationId}`, {
@@ -112,7 +128,10 @@ export async function updateStation(formData: FormData, stationId: number): Prom
             body: JSON.stringify({
                 name,
                 location,
-                status
+                status,
+                is_hub,
+                primary_route_id,
+                secondary_route_id
             })
         })
 
@@ -185,6 +204,8 @@ export default function StationManage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [currentStation, setCurrentStation] = useState<Station | null>(null)
     const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+    const [routes, setRoutes] = useState<Route[]>([])
+    const [isRoutesLoading, setIsRoutesLoading] = useState<boolean>(true)
 
     const [activeFilter, setActiveFilter] = useState<Filters>("none")
 
@@ -202,7 +223,10 @@ export default function StationManage() {
         defaultValues: {
             name: "",
             location: "",
-            status: "active"
+            status: "active",
+            is_hub: false,
+            primary_route_id: undefined,
+            secondary_route_id: undefined
         },
     })
 
@@ -215,7 +239,10 @@ export default function StationManage() {
         editForm.reset({
             name: station.name,
             location: station.location,
-            status: station.status as "active" | "inactive" | "maintenance" | "construction" | "planned"
+            status: station.status as "active" | "inactive" | "maintenance" | "construction" | "planned",
+            is_hub: station.is_hub || false,
+            primary_route_id: station.primary_route_id,
+            secondary_route_id: station.secondary_route_id
         });
         setIsEditModalOpen(true);
     };
@@ -228,7 +255,7 @@ export default function StationManage() {
     function onAddSubmit(values: z.infer<typeof formSchema>) {
         startTransition(async () => {
             const formData = new FormData()
-            Object.entries(values).forEach(([key, value]) => formData.append(key, value))
+            Object.entries(values).forEach(([key, value]) => formData.append(key, String(value)))
 
             const result = await addStation(formData)
             if (result?.errors) {
@@ -247,7 +274,7 @@ export default function StationManage() {
 
         startTransition(async () => {
             const formData = new FormData()
-            Object.entries(values).forEach(([key, value]) => formData.append(key, value))
+            Object.entries(values).forEach(([key, value]) => formData.append(key, String(value)))
 
             const result = await updateStation(formData, currentStation.station_id)
             if (result?.errors) {
@@ -317,6 +344,26 @@ export default function StationManage() {
 
         return matchesSearchQuery && matchesCheckboxes
     });
+
+    useEffect(() => {
+        async function loadRoutes() {
+            setIsRoutesLoading(true);
+            try {
+                const response = await fetch("http://localhost:8000/routes");
+                if (!response.ok) {
+                    throw new Error(`Error fetching routes: ${response.statusText}`);
+                }
+                const data = await response.json();
+                setRoutes(data);
+            } catch (error) {
+                console.error("Error fetching routes:", error);
+                setActionMessage({ type: 'error', text: 'Failed to load routes' });
+            } finally {
+                setIsRoutesLoading(false);
+            }
+        }
+        loadRoutes();
+    }, []);
 
     return (
         <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-4 space-y-8">
@@ -523,7 +570,6 @@ export default function StationManage() {
                                 </div>
                             </div>
                         )}
-
                         {/* Edit Station Modal */}
                         {isEditModalOpen && currentStation && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={(e) => {
@@ -590,6 +636,100 @@ export default function StationManage() {
                                                     </FormItem>
                                                 )}
                                             />
+
+                                            {/* Hub Checkbox */}
+                                            <FormField
+                                                control={editForm.control}
+                                                name="is_hub"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value}
+                                                                onCheckedChange={field.onChange}
+                                                            />
+                                                        </FormControl>
+                                                        <div className="space-y-1 leading-none">
+                                                            <FormLabel>Is this a Hub Station?</FormLabel>
+                                                            <p className="text-sm text-gray-500">
+                                                                Hub stations connect multiple routes
+                                                            </p>
+                                                        </div>
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            {/* Conditional Hub Route Fields */}
+                                            {editForm.watch("is_hub") && (
+                                                <div className="space-y-4 p-4 border rounded-md">
+                                                    <h3 className="font-medium text-sm">Hub Routes</h3>
+                                                    {/* Primary Route Field */}
+                                                    <FormField
+                                                        control={editForm.control}
+                                                        name="primary_route_id"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Primary Route</FormLabel>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select primary route" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        {isRoutesLoading ? (
+                                                                            <div className="p-2">Loading routes...</div>
+                                                                        ) : (
+                                                                            routes.map((route) => (
+                                                                                <SelectItem key={route.route_id} value={route.route_id}>
+                                                                                    {route.route_name}
+                                                                                </SelectItem>
+                                                                            ))
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    {/* Secondary Route Field */}
+                                                    <FormField
+                                                        control={editForm.control}
+                                                        name="secondary_route_id"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Secondary Route</FormLabel>
+                                                                <Select
+                                                                    onValueChange={field.onChange}
+                                                                    defaultValue={field.value}
+                                                                >
+                                                                    <FormControl>
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder="Select secondary route" />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        {isRoutesLoading ? (
+                                                                            <div className="p-2">Loading routes...</div>
+                                                                        ) : (
+                                                                            routes.map((route) => (
+                                                                                <SelectItem key={route.route_id} value={route.route_id}>
+                                                                                    {route.route_name}
+                                                                                </SelectItem>
+                                                                            ))
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            )}
 
                                             {/* Submit Button */}
                                             <div className="flex justify-between">
