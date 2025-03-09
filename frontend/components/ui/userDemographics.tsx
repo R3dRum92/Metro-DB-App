@@ -96,35 +96,37 @@ const UserDemographics: React.FC = () => {
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                 ) : (
-                    <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={demographicData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                >
-                                    {demographicData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="text-center mt-2 text-sm text-gray-500">
+                    <>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={demographicData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {demographicData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="text-center mt-2 text-sm text-gray-500 border-t border-gray-100 pt-2">
                             {error ? (
                                 <p className="text-amber-600">{error}</p>
                             ) : (
                                 <p>Total Users: {totalUsers}</p>
                             )}
                         </div>
-                    </div>
+                    </>
                 )}
             </CardContent>
         </Card>
