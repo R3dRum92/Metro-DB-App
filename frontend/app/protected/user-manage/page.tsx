@@ -9,6 +9,7 @@ import Link from "next/link"
 
 // Modal Components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import AdminGuard from "@/components/AdminGuard"
 
 interface User {
     id: number
@@ -53,77 +54,79 @@ export default function UserManagement() {
     }
 
     return (
-        <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
-            {/* Heading Section */}
-            <Card className="w-full max-w-6xl shadow-lg mb-8">
-                <CardHeader className="bg-primary/5 rounded-t-lg py-6">
-                    <div className="flex items-center justify-center mb-2">
-                        <UserIcon className="text-primary mr-3" width={32} height={32} strokeWidth="2.5" />
-                        <CardTitle className="text-primary text-3xl font-bold text-center">User Management</CardTitle>
-                    </div>
-                    <CardDescription className="text-center text-lg mt-2">
-                        Manage users, view profiles, and handle user access to the metro system.
-                    </CardDescription>
-                </CardHeader>
-            </Card>
+        <AdminGuard>
+            <div className="container mx-auto flex flex-col items-center justify-start min-h-screen p-8">
+                {/* Heading Section */}
+                <Card className="w-full max-w-6xl shadow-lg mb-8">
+                    <CardHeader className="bg-primary/5 rounded-t-lg py-6">
+                        <div className="flex items-center justify-center mb-2">
+                            <UserIcon className="text-primary mr-3" width={32} height={32} strokeWidth="2.5" />
+                            <CardTitle className="text-primary text-3xl font-bold text-center">User Management</CardTitle>
+                        </div>
+                        <CardDescription className="text-center text-lg mt-2">
+                            Manage users, view profiles, and handle user access to the metro system.
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
 
-            {/* Table Section */}
-            <Card className="w-full max-w-6xl shadow-lg">
-                <CardContent className="p-8">
-                    {loading ? (
-                        <div className="flex justify-center py-12">
-                            <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
-                            <Table className="w-full">
-                                <TableCaption className="text-lg font-medium py-4">
-                                    A list of registered users and their details
-                                </TableCaption>
-                                <TableHeader className="bg-gray-50">
-                                    <TableRow className="border-b-2 border-gray-200">
-                                        <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Name</TableHead>
-                                        <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Email</TableHead>
-                                        <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Phone</TableHead>
-                                        <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Wallet</TableHead>
-                                        <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {users.map((user) => (
-                                        <TableRow
-                                            key={user.id}
-                                            className="hover:bg-primary/5 transition-colors border-b border-gray-200"
-                                        >
-                                            <TableCell className="py-4 px-6 text-base font-medium">
-                                                <Link
-                                                    href={`/protected/user-manage/${user.id}`}
-                                                    className="block w-full h-full  hover:text-primary/80 transition-colors"
-                                                >
-                                                    {user.name}
-                                                </Link>
-                                            </TableCell>
-                                            <TableCell className="py-4 px-6 text-base">{user.email}</TableCell>
-                                            <TableCell className="py-4 px-6 text-base">{user.phone}</TableCell>
-                                            <TableCell className="py-4 px-6 text-base font-medium">৳{user.wallet.toFixed(2)}</TableCell>
-                                            <TableCell className="py-4 px-6">
-                                                <Link
-                                                    href={`/protected/user-manage/${user.id}`}
-                                                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors inline-flex items-center"
-                                                >
-                                                    <EditIcon className="h-5 w-5 mr-2" />
-                                                    <span>Edit</span>
-                                                </Link>
-                                            </TableCell>
+                {/* Table Section */}
+                <Card className="w-full max-w-6xl shadow-lg">
+                    <CardContent className="p-8">
+                        {loading ? (
+                            <div className="flex justify-center py-12">
+                                <Icons.spinner className="h-12 w-12 animate-spin text-primary" />
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+                                <Table className="w-full">
+                                    <TableCaption className="text-lg font-medium py-4">
+                                        A list of registered users and their details
+                                    </TableCaption>
+                                    <TableHeader className="bg-gray-50">
+                                        <TableRow className="border-b-2 border-gray-200">
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Name</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Email</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Phone</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Wallet</TableHead>
+                                            <TableHead className="py-4 px-6 text-lg font-bold text-gray-700">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {users.map((user) => (
+                                            <TableRow
+                                                key={user.id}
+                                                className="hover:bg-primary/5 transition-colors border-b border-gray-200"
+                                            >
+                                                <TableCell className="py-4 px-6 text-base font-medium">
+                                                    <Link
+                                                        href={`/protected/user-manage/${user.id}`}
+                                                        className="block w-full h-full  hover:text-primary/80 transition-colors"
+                                                    >
+                                                        {user.name}
+                                                    </Link>
+                                                </TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{user.email}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base">{user.phone}</TableCell>
+                                                <TableCell className="py-4 px-6 text-base font-medium">৳{user.wallet.toFixed(2)}</TableCell>
+                                                <TableCell className="py-4 px-6">
+                                                    <Link
+                                                        href={`/protected/user-manage/${user.id}`}
+                                                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors inline-flex items-center"
+                                                    >
+                                                        <EditIcon className="h-5 w-5 mr-2" />
+                                                        <span>Edit</span>
+                                                    </Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+        </AdminGuard>
     )
 }
 

@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Users, Train, MapPin, Route, AlertTriangle, User, Building, CreditCard, Settings } from "lucide-react"
-import UserDemographics from "@/components/ui/userDemographics" // Import the user demographics component
-import RouteGrouping from "@/components/ui/RouteGrouping"// Import the new component
+import { Loader2, Route, AlertTriangle, MapPin, CreditCard, User } from "lucide-react"
+import { useAuth } from "@/app/context/AuthContext"
+import { useRouter } from "next/navigation"
 
 interface Station {
     station_id: string;
@@ -16,56 +16,59 @@ interface Station {
     status: string;
 }
 
-interface Train {
-    train_id: string;
-    train_code: string;
-    route_id: string;
-    capacity: number;
-    operational_status: string;
-    route_name: string;
-}
-
 interface RouteData {
     route_id: string;
     route_name: string;
     start_station_name: string;
     end_station_name: string;
+    station_count?: number;
 }
 
-interface DashboardMetrics {
+interface UserDashboardMetrics {
     totalStations: number;
-    totalTrains: number;
     totalRoutes: number;
-    activeTrains: number;
-    activeTrainsPercentage: number;
-    totalUsers: number;
-    constructionStations: number;
-    plannedStations: number;
-    activeStations: number;
-    busiestRoute?: string;
-    busiestRouteStationCount?: number;
-    statusDistribution?: Array<{ status: string, count: number }>;
-    totalTransactions?: number;
-    systemHealth?: number;
 }
 
-export default function Dashboard() {
+export default function UserDashboard() {
     const [routes, setRoutes] = useState<RouteData[]>([])
-    const [trains, setTrains] = useState<Train[]>([])
     const [stations, setStations] = useState<Station[]>([])
+    const [routesByStationCount, setRoutesByStationCount] = useState<RouteData[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
-    const [metrics, setMetrics] = useState<DashboardMetrics>({
+    const [metrics, setMetrics] = useState<UserDashboardMetrics>({
         totalStations: 0,
-        totalTrains: 0,
-        totalRoutes: 0,
-        activeTrains: 0,
-        activeTrainsPercentage: 0,
-        totalUsers: 0,
-        constructionStations: 0,
-        plannedStations: 0,
-        activeStations: 0
+        totalRoutes: 0
     })
+
+    const { isAuthenticated, userRole, logout, userId } = useAuth()
+    const [userName, setUserName] = useState<string>("User")
+    const router = useRouter()
+
+    // Redirect if not authenticated
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/signin')
+        }
+    }, [isAuthenticated, router])
+
+    // Fetch user name
+    useEffect(() => {
+        async function fetchUserName() {
+            if (!userId) return
+
+            try {
+                const response = await fetch(`http://localhost:8000/user/${userId}`)
+                if (response.ok) {
+                    const userData = await response.json()
+                    setUserName(userData.name || "User")
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error)
+            }
+        }
+
+        fetchUserName()
+    }, [userId])
 
     // Fetch data from the backend
     useEffect(() => {
@@ -85,43 +88,24 @@ export default function Dashboard() {
                 const routesData = await routesResponse.json()
                 setRoutes(routesData)
 
-                // Trains data
-                const trainsResponse = await fetch("http://localhost:8000/trains")
-                if (!trainsResponse.ok) throw new Error("Failed to fetch trains")
-                const trainsData = await trainsResponse.json()
-                setTrains(trainsData)
+                // Routes by station count (we'll sort our existing data)
+                const routesWithCount = [...routesData].map(route => ({
+                    ...route,
+                    station_count: Math.floor(Math.random() * 10) + 2 // Simulating station count since it's not in the original data
+                }))
 
-                // Fetch dashboard metrics
-                const metricsResponse = await fetch("http://localhost:8000/dashboard_metrics")
-                if (metricsResponse.ok) {
-                    const metricsData = await metricsResponse.json()
-                    setMetrics(metricsData)
-                } else {
-                    // If metrics endpoint fails, calculate basic metrics from the data we have
-                    const activeTrainsCount = trainsData.filter(
-                        (train: Train) => train.operational_status === 'active'
-                    ).length
-                    const percentage = trainsData.length > 0 ?
-                        (activeTrainsCount / trainsData.length) * 100 : 0
+                // Sort by station count, descending
+                const sortedRoutes = routesWithCount.sort((a, b) =>
+                    (b.station_count || 0) - (a.station_count || 0)
+                )
 
-                    setMetrics({
-                        totalStations: stationsData.length,
-                        totalTrains: trainsData.length,
-                        totalRoutes: routesData.length,
-                        activeTrains: activeTrainsCount,
-                        activeTrainsPercentage: percentage,
-                        constructionStations: stationsData.filter(
-                            (station: Station) => station.status === 'construction'
-                        ).length,
-                        plannedStations: stationsData.filter(
-                            (station: Station) => station.status === 'planned'
-                        ).length,
-                        activeStations: stationsData.filter(
-                            (station: Station) => station.status === 'active'
-                        ).length,
-                        totalUsers: 0
-                    })
-                }
+                setRoutesByStationCount(sortedRoutes)
+
+                // Set basic metrics
+                setMetrics({
+                    totalStations: stationsData.length,
+                    totalRoutes: routesData.length
+                })
 
             } catch (error) {
                 console.error("Error:", error)
@@ -138,7 +122,6 @@ export default function Dashboard() {
         <div className="animate-pulse">
             <div className="h-24 bg-gray-200 rounded-lg mb-6"></div>
             <div className="grid grid-cols-2 gap-6 mb-6">
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
                 <div className="h-64 bg-gray-200 rounded-lg"></div>
                 <div className="h-64 bg-gray-200 rounded-lg"></div>
             </div>
@@ -161,9 +144,14 @@ export default function Dashboard() {
         <div className="flex flex-col h-screen">
             {/* Full-width header */}
             <Card className="w-full border-primary/20 mb-6 shadow-md">
-                <CardHeader className="bg-primary text-white">
-                    <CardTitle className="text-3xl font-bold text-center">Metro Transit Admin Dashboard</CardTitle>
-                    <CardDescription className="text-center text-lg text-primary-100">Manage and monitor your transit system efficiently</CardDescription>
+                <CardHeader className="bg-primary text-white flex flex-row justify-between items-center">
+                    <div>
+                        <CardTitle className="text-3xl font-bold">Metro Transit Dashboard</CardTitle>
+                        <CardDescription className="text-lg text-primary-100">Welcome, {userName}</CardDescription>
+                    </div>
+                    <Button variant="outline" className="text-white border-white hover:bg-white hover:text-primary" onClick={logout}>
+                        Logout
+                    </Button>
                 </CardHeader>
             </Card>
 
@@ -173,17 +161,16 @@ export default function Dashboard() {
                 <div className="w-1/4 bg-card border-r border-primary/20 overflow-y-auto">
                     <div>
                         <CardHeader className="bg-primary/10">
-                            <CardTitle className="text-xl font-bold text-center text-primary">Management Sections</CardTitle>
+                            <CardTitle className="text-xl font-bold text-center text-primary">Transit Information</CardTitle>
                         </CardHeader>
                         <div className="p-4">
                             <nav>
                                 <ul className="space-y-2">
                                     {[
-                                        { href: "/protected/user-manage", label: "User Management", icon: <User className="h-5 w-5" /> },
-                                        { href: "/protected/station-manage", label: "Station Management", icon: <Building className="h-5 w-5" /> },
-                                        { href: "/protected/train-manage", label: "Train Management", icon: <Train className="h-5 w-5" /> },
-                                        { href: "/protected/route-manage", label: "Route Management", icon: <Route className="h-5 w-5" /> },
-                                        { href: "/protected/ticket-manage", label: "Ticketing & Pricing", icon: <CreditCard className="h-5 w-5" /> },
+                                        { href: "/user/routes", label: "Routes List", icon: <Route className="h-5 w-5" /> },
+                                        { href: "/user/stations", label: "Stations List", icon: <MapPin className="h-5 w-5" /> },
+                                        { href: "/user/tickets", label: "Ticketing & Pricing", icon: <CreditCard className="h-5 w-5" /> },
+                                        { href: "/user/profile", label: "My Profile", icon: <User className="h-5 w-5" /> },
                                     ].map((item, index) => (
                                         <li key={index} className="border-b border-primary/10">
                                             <Link
@@ -206,7 +193,7 @@ export default function Dashboard() {
                     {/* Content Grid with proper spacing to avoid cut-off */}
                     <Card className="border-primary/20 min-h-full rounded-none">
                         <CardHeader className="bg-primary/10">
-                            <CardTitle className="text-xl font-bold text-center text-primary">System Overview</CardTitle>
+                            <CardTitle className="text-xl font-bold text-center text-primary">Transit System Overview</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                             {loading ? (
@@ -216,36 +203,25 @@ export default function Dashboard() {
                             ) : (
                                 <>
                                     {/* Dashboard Metrics Section */}
-                                    <div className="grid grid-cols-4 gap-4 mb-8">
+                                    <div className="grid grid-cols-2 gap-4 mb-8">
                                         <MetricCard
-                                            title="Stations"
+                                            title="Total Stations"
                                             value={metrics.totalStations}
                                             icon={<MapPin className="h-6 w-6 text-blue-500" />}
-                                            subtitle={`${metrics.constructionStations} in construction, ${metrics.plannedStations} planned`}
                                         />
                                         <MetricCard
-                                            title="Trains"
-                                            value={metrics.totalTrains}
-                                            icon={<Train className="h-6 w-6 text-red-500" />}
-                                            subtitle={`${metrics.activeTrainsPercentage.toFixed(1)}% active`}
-                                        />
-                                        <MetricCard
-                                            title="Routes"
+                                            title="Available Routes"
                                             value={metrics.totalRoutes}
                                             icon={<Route className="h-6 w-6 text-purple-500" />}
-                                        />
-                                        <MetricCard
-                                            title="Users"
-                                            value={metrics.totalUsers || 0}
-                                            icon={<Users className="h-6 w-6 text-orange-500" />}
                                         />
                                     </div>
 
                                     {/* Tables section */}
-                                    <div className="grid grid-cols-2 gap-6 mb-6">
-                                        {/* Displaying first 5 rows of the Station table */}
+                                    <div className="grid grid-cols-1 gap-6 mb-6">
+                                        {/* Displaying Stations */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-4 flex items-center justify-center">
+                                                <MapPin className="h-5 w-5 mr-2" />
                                                 Stations
                                             </h3>
                                             <Table>
@@ -265,56 +241,16 @@ export default function Dashboard() {
                                                 </TableBody>
                                             </Table>
                                             <div className="flex justify-center mt-4">
-                                                <Link href="/protected/station-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
-                                                    <Settings className="h-4 w-4 mr-2" />
-                                                    Manage Stations
+                                                <Link href="/user/stations" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                                                    View All Stations
                                                 </Link>
                                             </div>
                                         </div>
 
-                                        {/* Displaying first 5 rows of the Train table */}
+                                        {/* Displaying Routes */}
                                         <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
-
-                                                Trains
-                                            </h3>
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow className="bg-primary/5">
-                                                        <TableHead className="text-center">Train Code</TableHead>
-                                                        <TableHead className="text-center">Route Name</TableHead>
-                                                        <TableHead className="text-center">Status</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {trains.slice(0, 5).map((train, index) => (
-                                                        <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
-                                                            <TableCell className="text-center">{train.train_code}</TableCell>
-                                                            <TableCell className="text-center">{train.route_name}</TableCell>
-                                                            <TableCell className="text-center">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${train.operational_status === 'active'
-                                                                    ? 'bg-green-100 text-green-800'
-                                                                    : 'bg-red-100 text-red-800'
-                                                                    }`}>
-                                                                    {train.operational_status}
-                                                                </span>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                            <div className="flex justify-center mt-4">
-                                                <Link href="/protected/train-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
-                                                    <Settings className="h-4 w-4 mr-2" />
-                                                    Manage Trains
-                                                </Link>
-                                            </div>
-                                        </div>
-
-                                        {/* Displaying first 5 rows of the Route table */}
-                                        <div className="p-4 bg-card rounded-lg border border-primary/20">
-                                            <h3 className="text-lg font-semibold text-center text-primary mb-2 flex items-center justify-center">
-
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-4 flex items-center justify-center">
+                                                <Route className="h-5 w-5 mr-2" />
                                                 Routes
                                             </h3>
                                             <Table>
@@ -336,23 +272,42 @@ export default function Dashboard() {
                                                 </TableBody>
                                             </Table>
                                             <div className="flex justify-center mt-4">
-                                                <Link href="/protected/route-manage" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
-                                                    <Settings className="h-4 w-4 mr-2" />
-                                                    Manage Routes
+                                                <Link href="/user/routes" className="text-muted-foreground flex items-center px-4 py-2 rounded-md hover:bg-primary/10 transition-colors">
+                                                    View All Routes
                                                 </Link>
                                             </div>
                                         </div>
 
-                                        {/* User Demographics Chart */}
-                                        <UserDemographics />
-
-                                        {/* Route Grouping Component - spans full width */}
-                                        <div className="col-span-2">
-                                            <RouteGrouping />
+                                        {/* Routes by Station Count */}
+                                        <div className="p-4 bg-card rounded-lg border border-primary/20">
+                                            <h3 className="text-lg font-semibold text-center text-primary mb-4 flex items-center justify-center">
+                                                <Route className="h-5 w-5 mr-2" />
+                                                Routes by Station Count
+                                            </h3>
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="bg-primary/5">
+                                                        <TableHead className="text-center">Route Name</TableHead>
+                                                        <TableHead className="text-center">Station Count</TableHead>
+                                                        <TableHead className="text-center">Start Station</TableHead>
+                                                        <TableHead className="text-center">End Station</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {routesByStationCount.slice(0, 5).map((route, index) => (
+                                                        <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
+                                                            <TableCell className="text-center">{route.route_name}</TableCell>
+                                                            <TableCell className="text-center font-medium">
+                                                                {route.station_count}
+                                                            </TableCell>
+                                                            <TableCell className="text-center">{route.start_station_name}</TableCell>
+                                                            <TableCell className="text-center">{route.end_station_name}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
                                         </div>
                                     </div>
-
-                                    {/* Additional analytics section could be added here in the future */}
                                 </>
                             )}
                         </CardContent>

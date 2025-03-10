@@ -63,7 +63,7 @@ export default function SignUpPage() {
         setServerErrors({});
         setState({ success: true, message: result.message, errors: {} });
         form.reset();
-        router.push("/protected/dashboard");
+        router.push("/user/dashboard");
       }
     });
   }

@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { signIN, type SignupActionResult } from "../actions/auth"
+import { signIN, type SignInActionResult } from "../actions/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-
-import { useRouter } from "next/navigation"
+import { useAuth } from "../context/AuthContext"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -20,14 +19,15 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
-export default function SignUpPage() {
+export default function SignInPage() {
   const [isPending, startTransition] = useTransition()
-  const [state, setState] = useState<SignupActionResult>({
+  const [state, setState] = useState<SignInActionResult>({
     success: false,
     message: "",
     errors: {},
   })
   const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({})
+  const { login } = useAuth()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,8 +36,6 @@ export default function SignUpPage() {
       password: "",
     },
   })
-
-  const router = useRouter() // 2. Initialize the router
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
@@ -53,8 +51,11 @@ export default function SignUpPage() {
         setState({ success: true, message: result.message, errors: {} })
         form.reset()
 
-        router.push('/protected/dashboard')
-
+        // Use the token from the result to log in
+        if (result.access_token) {
+          login(result.access_token)
+          // No need to redirect here as login() will handle redirection based on role
+        }
       }
     })
   }
